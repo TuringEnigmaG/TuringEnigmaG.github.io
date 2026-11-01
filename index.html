@@ -114,7 +114,7 @@ footer{margin-top:30px;font:12px var(--mono);color:var(--ink-3)}
 <div class="stats" aria-label="At a glance">
   <div><b>7 yrs</b><span>data science in finance, vehicles & banking</span></div>
   <div><b>3</b><span>countries lived and worked in</span></div>
-  <div><b>2</b><span>live interactive demos below</span></div>
+  <div><b>3</b><span>live interactive demos below</span></div>
   <div><b>100%</b><span>of this site built with Claude Code</span></div>
 </div>
 
@@ -131,6 +131,14 @@ footer{margin-top:30px;font:12px var(--mono);color:var(--ink-3)}
       <div class="nums"><span><b>3</b> tiers</span><span><b>5</b> segments</span><span><b>4</b> guardrails</span><span>best-price solver</span></div>
       <span class="tags">pricing · elasticity · unit economics · data viz</span>
       <span class="go">Open the model →</span>
+    </a>
+    <a class="card" href="detective/">
+      <span class="badge">NLP · just for fun</span>
+      <h3>The Bayesian Detective</h3>
+      <p>I ran Agatha Christie's first mystery through a word-counting Bayesian model, chapter by chapter. It catches one murderer from page one, and never sees the other. An evidence board with red string, and a spoiler gate.</p>
+      <div class="nums"><span><b>13</b> chapters</span><span><b>7</b> suspects</span><span><b>1 of 2</b> killers caught</span></div>
+      <span class="tags">NLP · Bayesian updating · text analysis · data viz</span>
+      <span class="go">Open the case file →</span>
     </a>
     <a class="card" href="quant/">
       <span class="badge">Case study</span>
@@ -206,6 +214,7 @@ const WORKS = [
   { id: 'carfax', label: 'Vehicle reliability models (Carfax)', uses: ['surv', 'ml', 'ts'], d: '100+ VIN-level survival models over 2.6B vehicle records, served to the Vehicle History Report.' },
   { id: 'recall', label: 'Recall NLP pipeline (Carfax)', uses: ['nlp', 'ml'], d: 'BERT pipeline classifying 80,000+ recall entries a day into safety categories, with active learning.' },
   { id: 'mv', label: '汚れない手 · music video', href: '#music', uses: ['gen', 'code'], d: 'AI music video made end to end. Click to watch.' },
+  { id: 'det', label: 'The Bayesian Detective', href: 'detective/', uses: ['nlp', 'causal', 'viz', 'code'], d: 'Can a word-counting model solve Agatha Christie\u2019s first mystery? Click to open the case file.' },
   { id: 'book', label: '解码中医 · book', uses: ['causal'], d: 'Bilingual book explaining Traditional Chinese Medicine through modern medical evidence.' },
 ];
 let bgLayers = [], flakes = [];
