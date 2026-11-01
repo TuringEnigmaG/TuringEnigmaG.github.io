@@ -1,0 +1,75 @@
+{
+  "id": "styles",
+  "title": "The Mysterious Affair at Styles",
+  "author": "Agatha Christie",
+  "language": "en",
+  "source": "styles.txt",
+  "start_after": "CHAPTER XIII. POIROT EXPLAINS",
+  "start_marker": "CHAPTER I.\n",
+  "end_marker": "*** END OF THE PROJECT GUTENBERG",
+  "chapter_regex": "\\nCHAPTER [IVXL]+\\.\\n",
+  "reveal_chapter": 13,
+  "victim": "Mrs. Inglethorp",
+  "suspects": {
+    "Alfred Inglethorp": [
+      "Alfred Inglethorp",
+      "Mr. Inglethorp",
+      "Mr Inglethorp",
+      "Alfred"
+    ],
+    "Evelyn Howard": [
+      "Evelyn Howard",
+      "Miss Howard",
+      "Evelyn",
+      "Evie",
+      "Howard"
+    ],
+    "John Cavendish": [
+      "John Cavendish",
+      "John"
+    ],
+    "Lawrence Cavendish": [
+      "Lawrence Cavendish",
+      "Lawrence"
+    ],
+    "Mary Cavendish": [
+      "Mary Cavendish",
+      "Mrs. Cavendish",
+      "Mrs Cavendish",
+      "Mary"
+    ],
+    "Cynthia Murdoch": [
+      "Cynthia Murdoch",
+      "Cynthia",
+      "Murdoch"
+    ],
+    "Dr. Bauerstein": [
+      "Dr. Bauerstein",
+      "Bauerstein"
+    ]
+  },
+  "culprits": [
+    "Alfred Inglethorp",
+    "Evelyn Howard"
+  ],
+  "note": "Full text: Project Gutenberg eBook #863, public domain in the US.",
+  "other_renames": {
+    "Mrs. Inglethorp": "Mrs. Vane",
+    "Mrs Inglethorp": "Mrs. Vane",
+    "Emily Inglethorp": "Emily Vane",
+    "Emily": "Margaret",
+    "Styles Court": "Ashcombe Hall",
+    "Styles St. Mary": "Ashcombe village",
+    "Styles": "Ashcombe",
+    "Hercule Poirot": "Gaston Moreau",
+    "Poirot": "Moreau",
+    "Hastings": "Hale",
+    "Japp": "Barr",
+    "Inglethorp": "Vane",
+    "Cavendish": "Merriman",
+    "Agatha Christie": "the author",
+    "Inglethorps": "Vanes",
+    "Inglethorpe": "Vane",
+    "Cavendishes": "Merrimans"
+  }
+}

@@ -1,0 +1,5 @@
+books/*.txt
+books/*.epub
+runs/
+.venv/
+__pycache__/
