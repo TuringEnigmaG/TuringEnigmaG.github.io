@@ -1,0 +1,25 @@
+{
+  "id": "dzaka",
+  "title": "D坂の殺人事件",
+  "author": "江戸川乱歩 (Edogawa Ranpo)",
+  "language": "ja",
+  "source": "dzaka.txt",
+  "start_marker": "［＃３字下げ］（上）事実",
+  "end_marker": "底本：",
+  "strip_aozora": true,
+  "segments": 8,
+  "unit": "part",
+  "reveal_marker": "「ミュンスターベルヒが賢くも説破した通り」",
+  "victim": "古本屋の細君",
+  "codename_prefix": "容疑者",
+  "suspects": {
+    "明智小五郎": ["明智小五郎", "明智君", "明智"],
+    "古本屋の主人": ["古本屋の主人", "古本屋の亭主"],
+    "旭屋（蕎麦屋）の主人": ["旭屋の主人", "蕎麦屋の主人"],
+    "目撃した二人の学生": ["二人の学生"],
+    "語り手（私）": []
+  },
+  "culprits": ["旭屋（蕎麦屋）の主人"],
+  "other_renames": {"Ｄ坂": "Ｍ坂", "白梅軒": "青柳亭", "小五郎": "", "小林刑事": "森田刑事", "江戸川乱歩": "作者", "旭屋": "朝日庵"},
+  "note": "Text: Aozora Bunko card 56650 (public domain in Japan). Culprit stored here only; keep this file out of anything shown before the reveal."
+}

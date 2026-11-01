@@ -45,14 +45,31 @@ def load_book(cfg_path):
     start = raw.index(cfg["start_marker"], raw.index(cfg["start_after"]) if cfg.get("start_after") else 0)
     end = raw.index(cfg["end_marker"]) if cfg.get("end_marker") else len(raw)
     body = raw[start:end]
-    chapters = [c.strip() for c in re.split(cfg["chapter_regex"], "\n" + body) if c.strip()]
+    if cfg.get("strip_aozora"):
+        body = re.sub(r"《[^》]*》|｜|［＃[^］]*］", "", body)   # 青空文库的注音与排版注记
+    if cfg.get("segments"):
+        # 没有章节的短篇：揭晓之前按段落等分成 N 段，揭晓部分单独作为最后一段
+        cut = body.index(cfg["reveal_marker"])
+        paras = [p for p in body[:cut].split("\n") if p.strip()]
+        n, total = cfg["segments"], sum(len(p) for p in paras)
+        chapters, cur, acc = [], [], 0
+        for p in paras:
+            cur.append(p); acc += len(p)
+            if acc >= total * (len(chapters) + 1) / n and len(chapters) < n - 1:
+                chapters.append("\n".join(cur)); cur = []
+        chapters.append("\n".join(cur))
+        chapters.append(body[cut:].strip())
+        cfg["reveal_chapter"] = len(chapters)
+    else:
+        chapters = [c.strip() for c in re.split(cfg["chapter_regex"], "\n" + body) if c.strip()]
     cfg["chapters"] = chapters
     return cfg
 
 
 def codenames(cfg):
     # 嫌疑人按名单顺序映射为 Suspect A、B、C…
-    return {name: f"Suspect {string.ascii_uppercase[i]}" for i, name in enumerate(cfg["suspects"])}
+    prefix = cfg.get("codename_prefix", "Suspect ")
+    return {name: f"{prefix}{string.ascii_uppercase[i]}" for i, name in enumerate(cfg["suspects"])}
 
 
 def rename(text, cfg):
@@ -60,8 +77,9 @@ def rename(text, cfg):
     pairs = [(alias, cn[name]) for name, aliases in cfg["suspects"].items() for alias in aliases]
     pairs += list(cfg.get("other_renames", {}).items())   # 侦探、受害人、地名等能暴露书名的专有名词
     pairs = sorted(pairs, key=lambda p: -len(p[0]))
+    cjk = cfg.get("language") in ("ja", "zh")   # 中日文没有词边界，直接整串替换（长名优先）
     for alias, code in pairs:
-        text = re.sub(r"(?<![\w])" + re.escape(alias) + r"(?![\w])", code, text)
+        text = text.replace(alias, code) if cjk else re.sub(r"(?<![\w])" + re.escape(alias) + r"(?![\w])", code, text)
     return text
 
 
@@ -99,10 +117,11 @@ def build_task(cfg, condition, k):
              f"{cfg['victim']}? Suspects: {', '.join(names)}.")
         return [], q, names
     chapters = cfg["chapters"][:k]
-    blocks = [f"[Chapter {i + 1}]\n" + (rename(c, cfg) if renamed else c) for i, c in enumerate(chapters)]
-    head = "the novel below" if renamed else f"\"{cfg['title']}\" by {cfg['author']}"
-    q = (f"You have read chapters 1 to {k} of {head}. The victim is {rename(cfg['victim'], cfg) if renamed else cfg['victim']}. "
-         f"Suspects: {', '.join(names)}. Based only on these chapters, who is the murderer?")
+    unit = cfg.get("unit", "chapter")
+    blocks = [f"[{unit.capitalize()} {i + 1}]\n" + (rename(c, cfg) if renamed else c) for i, c in enumerate(chapters)]
+    head = "the story below" if renamed else f"\"{cfg['title']}\" by {cfg['author']}"
+    q = (f"You have read {unit}s 1 to {k} of {head}. The victim is {rename(cfg['victim'], cfg) if renamed else cfg['victim']}. "
+         f"Suspects: {', '.join(names)}. Based only on these {unit}s, who is the murderer?")
     return blocks, q, names
 
 
@@ -179,7 +198,7 @@ def done_keys(path):
 
 
 def estimate_tokens(text, lang):
-    return len(text) / (1.3 if lang == "zh" else 4.0)
+    return len(text) / (1.3 if lang in ("zh", "ja") else 4.0)
 
 
 def plan(cfg, conditions, cutoffs):
@@ -204,7 +223,8 @@ def run(args):
             continue
         tok_in = sum(estimate_tokens("".join(b) + q, cfg["language"]) for _, _, b, q, _ in jobs)
         p = PRICES.get(model)
-        cost = f"≈ ${tok_in / 1e6 * p[0] * 0.35 + len(jobs) * 0.004 * p[1]:.2f} with caching (≈ ${tok_in / 1e6 * p[0]:.2f} without)" if p else "price unknown"
+        out_cost = len(jobs) * 3000 / 1e6 * p[1] if p else 0   # 每次回答约 3k 输出（含思考）
+        cost = f"≈ ${tok_in / 1e6 * p[0] * 0.35 + out_cost:.2f} with caching (≈ ${tok_in / 1e6 * p[0] + out_cost:.2f} without)" if p else "price unknown"
         print(f"  {model}: ≈{tok_in / 1e3:,.0f}k input tokens, {cost}")
         if args.dry_run:
             continue
@@ -260,9 +280,53 @@ def score(args):
     print("wrote", dest)
 
 
+PROBE_SCHEMA = {
+    "type": "object",
+    "properties": {"knows_the_book": {"type": "boolean"}, "culprit": {"type": "string"},
+                   "confidence": {"type": "number"}, "rationale": {"type": "string"}},
+    "required": ["knows_the_book", "culprit", "confidence", "rationale"],
+    "additionalProperties": False,
+}
+
+
+def probe(args):
+    """只给书名和作者，问凶手是谁；答案由人工对照判分，存进 runs/probe__<model>.jsonl。"""
+    import anthropic
+
+    client = anthropic.Anthropic()
+    for model in args.models.split(","):
+        if not model.startswith("claude-"):
+            print(f"  skip {model}: the title probe currently calls Claude only")
+            continue
+        path = RUNS / f"probe__{model}.jsonl"
+        RUNS.mkdir(exist_ok=True)
+        done = {json.loads(l)["title"] for l in path.read_text().splitlines()} if path.exists() else set()
+        for item in args.probe.split(";"):
+            title, author = [x.strip() for x in item.split("|")]
+            if title in done:
+                continue
+            q = (f"Without looking anything up: in the mystery novel {title} by {author}, who is the murderer? "
+                 "If you don't actually know this book, set knows_the_book to false and say so rather than guessing. "
+                 "Give the culprit's name as it appears in the book, and your confidence from 0 to 1.")
+            resp = client.beta.messages.create(
+                model=model, max_tokens=16000, messages=[{"role": "user", "content": q}],
+                output_config={"effort": args.effort, "format": {"type": "json_schema", "schema": PROBE_SCHEMA}},
+                betas=["server-side-fallback-2026-07-01"], fallbacks="default",
+            )
+            fell_back = any(getattr(e, "type", "") == "fallback_message" for e in (resp.usage.iterations or []))
+            row = {"title": title, "author": author, "model": model, "served_by": resp.model, "fallback": fell_back,
+                   "stop_reason": resp.stop_reason, "grade": None}   # grade 由人工填写：correct / wrong / abstained
+            if resp.stop_reason != "refusal":
+                row.update(json.loads(next(b.text for b in resp.content if b.type == "text")))
+            with path.open("a") as f:
+                f.write(json.dumps(row, ensure_ascii=False) + "\n")
+            print(f"  {model} · {title}: {row.get('culprit', '(refused)')} (confidence {row.get('confidence')})")
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--book", required=True)
+    ap.add_argument("--book")
+    ap.add_argument("--probe", help='Title-only probe, e.g. "假面山庄|东野圭吾;放学后|东野圭吾"')
     ap.add_argument("--models", default="claude-opus-5-5,claude-sonnet-5-5,claude-haiku-5-5")
     ap.add_argument("--conditions", default="title_only,original,renamed")
     ap.add_argument("--cutoffs", default="all", help='"all" = every chapter before the reveal, or e.g. "2,5,8,12"')
@@ -270,4 +334,9 @@ if __name__ == "__main__":
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--score", action="store_true")
     a = ap.parse_args()
-    score(a) if a.score else run(a)
+    if a.probe:
+        probe(a)
+    elif not a.book:
+        ap.error("--book is required unless you use --probe")
+    else:
+        score(a) if a.score else run(a)

@@ -3,3 +3,5 @@ books/*.epub
 runs/
 .venv/
 __pycache__/
+books/*.zip
+books/*_raw/
