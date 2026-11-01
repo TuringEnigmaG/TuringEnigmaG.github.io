@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>解码中医 · Decoding TCM</title>
+<meta name="description" content="解码中医：用现代医学读懂古老智慧。A bilingual book and video series that explains Traditional Chinese Medicine through modern medicine.">
+<link rel="icon" href="../brand/biggmark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;900&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* 布局：宣纸与墨色，朱砂印章。标题 → 两种语言 → 互译卡片 → 地图与导航 → 目录 → 结语。单一浅色设计 */
+:root{
+  color-scheme:light;
+  --paper:#F4EEE2; --paper-2:#EAE2D2; --card:#FBF7EF; --ink:#1C1A17; --ink-2:#4E4A43; --ink-3:#8A8377; --line:#D9CFBD;
+  --cinnabar:#B83A2A; --jade:#2F6F5E; --gold:#A87A2C;
+  --serif:"Noto Serif SC","Songti SC",Georgia,serif; --sans:"Source Sans 3","PingFang SC","Microsoft YaHei",sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.75 var(--sans);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 15% 10%,rgba(168,122,44,.08),transparent 50%),radial-gradient(ellipse at 90% 80%,rgba(47,111,94,.07),transparent 50%)}
+.wrap{position:relative;max-width:1000px;margin:0 auto;padding:30px max(18px,env(safe-area-inset-left)) 80px max(18px,env(safe-area-inset-right))}
+a{color:var(--jade)}
+nav{display:flex;justify-content:space-between;align-items:center;font:13px var(--mono);color:var(--ink-3)}
+nav a{color:var(--ink-3);text-decoration:none} nav a:hover{color:var(--ink)}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.lang button{font:600 13px var(--sans);border:0;background:none;padding:5px 14px;cursor:pointer;color:var(--ink-2)}
+.lang button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.lang button:focus-visible,.term:focus-visible{outline:2px solid var(--cinnabar);outline-offset:2px}
+html:not([data-lang="zh"]) [data-l="zh"],html:not([data-lang="en"]) [data-l="en"]{display:none!important}
+.hero{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;margin:56px 0 20px}
+h1{font:900 clamp(56px,11vw,120px)/1 var(--serif);letter-spacing:.06em;margin:0}
+.sub{font:600 clamp(18px,2.6vw,24px)/1.4 var(--serif);color:var(--ink-2);margin:14px 0 0}
+.seal{width:96px;height:96px;border:4px solid var(--cinnabar);color:var(--cinnabar);display:grid;place-items:center;font:900 30px/1.05 var(--serif);text-align:center;transform:rotate(-4deg);border-radius:6px;box-shadow:inset 0 0 0 3px var(--paper),inset 0 0 0 5px var(--cinnabar)}
+.meta{font:13px var(--mono);color:var(--ink-3);margin-top:10px}
+h2{font:600 28px/1.3 var(--serif);margin:64px 0 10px;display:flex;align-items:center;gap:14px}
+h2::after{content:"";flex:1;height:1px;background:var(--line)}
+p{max-width:66ch;color:var(--ink-2)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+@media (max-width:700px){.two{grid-template-columns:1fr}.hero{grid-template-columns:1fr}}
+.side{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+.side b{display:block;font:600 22px var(--serif);margin-bottom:6px}
+.side span{font:12px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.side p{margin:6px 0 0}
+.terms{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:18px}
+.term{perspective:900px;border:0;background:none;padding:0;cursor:pointer;text-align:left;min-height:170px;font:inherit}
+.inner{position:relative;width:100%;height:100%;min-height:170px;transition:transform .5s;transform-style:preserve-3d}
+.term[aria-pressed="true"] .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;padding:16px;border:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.front{background:var(--card)}
+.front b{font:900 28px/1.2 var(--serif)}
+.front i{font-style:normal;font:12px var(--mono);color:var(--ink-3)}
+.front small{margin-top:auto;font:12px var(--sans);color:var(--cinnabar)}
+.back{background:var(--ink);color:var(--paper);transform:rotateY(180deg);font-size:14.5px;line-height:1.55}
+.back em{font-style:normal;font:12px var(--mono);color:#E9C46A;letter-spacing:.06em;text-transform:uppercase}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.filters button{font:600 13px var(--sans);border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px;cursor:pointer;color:var(--ink-2)}
+.filters button[aria-pressed="true"]{border-color:var(--jade);background:var(--jade);color:#fff}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:22px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+@media (max-width:760px){.flow{grid-template-columns:1fr 1fr}}
+.flow div{background:var(--card);padding:18px;border-right:1px solid var(--line);position:relative}
+.flow div:last-child{border-right:0}
+.flow b{display:block;font:900 34px var(--serif);color:var(--paper-2);-webkit-text-stroke:1px var(--ink-3)}
+.flow strong{display:block;font:600 17px var(--serif);margin:4px 0}
+.flow span{font-size:14.5px;color:var(--ink-2)}
+.flow .tcm strong{color:var(--jade)} .flow .mod strong{color:var(--cinnabar)}
+.quote{font:600 clamp(22px,3.4vw,32px)/1.6 var(--serif);text-align:center;margin:40px auto 0;max-width:24em}
+.quote span{color:var(--jade)} .quote em{font-style:normal;color:var(--cinnabar)}
+.eps{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:10px}
+.eps li{display:grid;grid-template-columns:78px 1fr;gap:14px;align-items:baseline;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px}
+.eps .no{font:12px var(--mono);color:var(--cinnabar);letter-spacing:.08em}
+.eps b{font:600 18px/1.4 var(--serif)}
+.eps p{margin:4px 0 0;font-size:15px}
+.closing{background:var(--ink);color:var(--paper);border-radius:14px;padding:32px 28px;margin-top:22px}
+.closing p{color:#D8D0C2;font:400 18px/1.9 var(--serif);max-width:none;margin:0 0 10px}
+.closing b{color:#fff;font-weight:600}
+.note{font-size:14px;color:var(--ink-3);border-top:1px solid var(--line);margin-top:56px;padding-top:16px}
+@media (prefers-reduced-motion:reduce){.inner{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav><a href="../">← Gloria Liu</a><div class="lang" role="group" aria-label="Language"><button id="lzh" aria-pressed="true">中文</button><button id="len" aria-pressed="false">English</button></div></nav>
+
+  <header class="hero">
+    <div>
+      <h1>解码中医</h1>
+      <p class="sub"><span data-l="zh">用现代医学读懂古老智慧</span><span data-l="en">Reading ancient wisdom through modern medicine</span></p>
+      <p class="meta"><span data-l="zh">少久 著 · 写作中 · 书 + 中英双语视频系列（EP1–EP6）</span><span data-l="en">by Shaojiu · in progress · a book plus a bilingual video series (EP1–EP6)</span></p>
+    </div>
+    <div class="seal" aria-hidden="true">少<br>久</div>
+  </header>
+
+  <h2><span data-l="zh">两种语言，同一个身体</span><span data-l="en">Two languages, one body</span></h2>
+  <p data-l="zh">两千年前，中医面对的是同样的人，却用完全不同的语言记录了人体的规律。这不是两种医学的对立，而是两种观察世界的方式。</p>
+  <p data-l="en">Two thousand years ago, Chinese medicine faced the same human body but described it in a completely different vocabulary. These aren't competing systems. They're two ways of observing the same reality.</p>
+  <div class="two">
+    <div class="side"><span style="color:var(--cinnabar)" data-l="zh">现代医学 · 看结构</span><span style="color:var(--cinnabar)" data-l="en">Modern medicine · structure</span><b data-l="zh">细胞、器官、分子、炎症因子</b><b data-l="en">Cells, organs, molecules, inflammatory markers</b><p data-l="zh">关心已经发生的问题：血糖高，诊断糖尿病。</p><p data-l="en">Focuses on what has already happened: high blood sugar, diagnose diabetes.</p></div>
+    <div class="side"><span style="color:var(--jade)" data-l="zh">中医 · 看状态</span><span style="color:var(--jade)" data-l="en">Chinese medicine · state</span><b data-l="zh">气血是否流畅、燥湿是否平衡、有没有“热”</b><b data-l="en">Is qi and blood flowing? Is dryness and dampness balanced? Is there “heat”?</b><p data-l="zh">关心正在发展的变化：血糖还正常时，已能察觉口干、易饿、心烦的趋势。</p><p data-l="en">Focuses on where things are heading: thirst, hunger and restlessness can show the trend before blood sugar rises.</p></div>
+  </div>
+
+  <h2><span data-l="zh">中医 ⇄ 现代医学 翻译器</span><span data-l="en">The TCM ⇄ modern medicine translator</span></h2>
+  <p data-l="zh">点一张卡片，看这句古老的话在现代医学里是什么意思。</p>
+  <p data-l="en">Tap a card to see what an old phrase means in modern medical terms.</p>
+  <div class="filters" role="group" aria-label="Filter cards"><button data-f="all" aria-pressed="true"><span data-l="zh">全部</span><span data-l="en">All</span></button><button data-f="sign" aria-pressed="false"><span data-l="zh">证候</span><span data-l="en">Patterns</span></button><button data-f="herb" aria-pressed="false"><span data-l="zh">药材</span><span data-l="en">Herbs</span></button></div>
+  <div class="terms" id="terms"></div>
+
+  <h2><span data-l="zh">地图与导航</span><span data-l="en">Map and navigation</span></h2>
+  <p class="quote"><span data-l="zh"><span>中医</span>的语言更像“地图”，<em>现代医学</em>更像“导航”。</span><span data-l="en"><span>Chinese medicine</span> reads like a map; <em>modern medicine</em> works like navigation.</span></p>
+  <div class="flow">
+    <div class="tcm"><b>1</b><strong data-l="zh">中医找方向</strong><strong data-l="en">TCM finds the direction</strong><span data-l="zh">发现机体失衡往哪里走</span><span data-l="en">Where the body is drifting out of balance</span></div>
+    <div class="mod"><b>2</b><strong data-l="zh">现代医学定位</strong><strong data-l="en">Medicine locates it</strong><span data-l="zh">确定具体病灶与指标</span><span data-l="en">Pinpoint the lesion and the markers</span></div>
+    <div class="tcm"><b>3</b><strong data-l="zh">系统再平衡</strong><strong data-l="en">Rebalance the system</strong><span data-l="zh">中药、营养、生活方式</span><span data-l="en">Herbs, nutrition, lifestyle</span></div>
+    <div class="mod"><b>4</b><strong data-l="zh">靶点矫正</strong><strong data-l="en">Correct the target</strong><span data-l="zh">需要时用西药精准处理</span><span data-l="en">Targeted drugs where needed</span></div>
+  </div>
+
+  <h2><span data-l="zh">目录</span><span data-l="en">Episodes</span></h2>
+  <ul class="eps" id="eps"></ul>
+
+  <h2><span data-l="zh">结语</span><span data-l="en">Closing</span></h2>
+  <div class="closing">
+    <div data-l="zh"><p>中医不是过时，是因为它描述的是人体永恒的规律——循环、免疫、代谢、情绪、睡眠、气血。而现代医学提供了看清这些规律的显微镜。</p><p><b>中医不是神秘，而是另一套逻辑。现代医学不是否定中医，而是照亮中医。</b></p></div>
+    <div data-l="en"><p>Chinese medicine isn't outdated, because it describes the body's lasting patterns: circulation, immunity, metabolism, mood, sleep, qi and blood. Modern medicine provides the microscope to see them clearly.</p><p><b>Chinese medicine isn't mysticism; it's another logic. Modern medicine doesn't refute it; it illuminates it.</b></p></div>
+  </div>
+
+  <p class="note" data-l="zh">本书与视频为科普内容，不构成医疗建议。身体不适、用药或调整治疗前，请咨询医生或药师。药材卡片描述的是研究中观察到的作用方向，不代表疗效承诺。</p>
+  <p class="note" data-l="en">This book and series are popular-science content, not medical advice. See a doctor or pharmacist before taking herbs or changing treatment. Herb cards describe effects reported in research, not promises of benefit.</p>
+</div>
+
+<script>
+// 互译卡片与目录；中英文切换
+const TERMS = [
+  { t: 'sign', zh: '风热上扰', en: 'Wind-heat rising', back_zh: '过敏型炎症：肥大细胞释放组胺，IL-4、IL-6 等促炎因子升高，黏膜充血、皮肤瘙痒。', back_en: 'An allergic-type inflammation: mast cells release histamine, IL-4 and IL-6 rise, mucosa reddens and skin itches.' },
+  { t: 'sign', zh: '湿热下注', en: 'Damp-heat pouring down', back_zh: '渗出型炎症：皮肤屏障破损、渗出，细菌增殖，局部温度上升。', back_en: 'An exudative inflammation: a broken skin barrier with oozing, bacterial overgrowth and local warmth.' },
+  { t: 'sign', zh: '气虚', en: 'Qi deficiency', back_zh: '代谢率偏低、肌力下降、交感活动不足。', back_en: 'Low metabolic rate, weaker muscles, underactive sympathetic tone.' },
+  { t: 'sign', zh: '血虚', en: 'Blood deficiency', back_zh: '血红蛋白下降、组织供氧不足、循环欠佳。', back_en: 'Lower haemoglobin, less oxygen reaching tissue, sluggish circulation.' },
+  { t: 'sign', zh: '气滞', en: 'Qi stagnation', back_zh: '自主神经长期紧张，带来胸闷、胃胀、痛经。', back_en: 'A chronically tense autonomic nervous system: chest tightness, bloating, period pain.' },
+  { t: 'sign', zh: '血瘀', en: 'Blood stasis', back_zh: '局部微循环障碍、慢性炎症、组织修复延迟。', back_en: 'Poor local microcirculation, chronic inflammation, slow tissue repair.' },
+  { t: 'sign', zh: '肝气郁结', en: 'Liver qi stagnation', back_zh: '长期压力导致自主神经功能紊乱，进而影响消化、睡眠和激素。', back_en: 'Long-term stress disrupting the autonomic nervous system, which then affects digestion, sleep and hormones.' },
+  { t: 'sign', zh: '气阴不足', en: 'Qi-yin insufficiency', back_zh: '口干、易饿、心烦、尿频：血糖还正常时，代谢已在往失衡的方向走。', back_en: 'Thirst, hunger, restlessness, frequent urination: metabolism drifting off balance before blood sugar shows it.' },
+  { t: 'herb', zh: '黄芩', en: 'Scutellaria (huangqin)', back_zh: '研究中观察到抗炎作用，与抑制 NF-κB 通路有关。', back_en: 'Studied for anti-inflammatory effects linked to the NF-κB pathway.' },
+  { t: 'herb', zh: '防风', en: 'Saposhnikovia (fangfeng)', back_zh: '研究中观察到稳定肥大细胞、抗过敏的作用。', back_en: 'Studied for stabilising mast cells and anti-allergic effects.' },
+  { t: 'herb', zh: '当归', en: 'Angelica (danggui)', back_zh: '研究中观察到扩张血管、调节雌激素受体的作用。', back_en: 'Studied for widening blood vessels and acting on estrogen receptors.' },
+  { t: 'herb', zh: '大黄', en: 'Rhubarb root (dahuang)', back_zh: '研究中观察到影响肠道菌群、抗炎、通便的作用。', back_en: 'Studied for effects on gut bacteria, inflammation and bowel movement.' },
+  { t: 'herb', zh: '麻黄', en: 'Ephedra (mahuang)', back_zh: '含麻黄碱，作用于肾上腺素受体，扩张支气管；有明确禁忌，须遵医嘱。', back_en: 'Contains ephedrine, which acts on adrenergic receptors and opens the airways. It has real risks; use only under medical advice.' },
+  { t: 'herb', zh: '人参 vs 黄芪', en: 'Ginseng vs astragalus', back_zh: '人参像“总电闸”，整体提振；黄芪像“防火墙”，偏重固表与免疫。', back_en: 'Ginseng is like the main power switch, a whole-body boost; astragalus is like a firewall, focused on defence and immunity.' },
+];
+const EPS = [
+  { no: 'EP1', zh: '防风通圣丸 × 湿疹', en: 'Fangfeng Tongsheng pills × eczema', d_zh: '《本草纲目》的智慧，现代医学的证据。', d_en: 'Wisdom from the Compendium of Materia Medica, evidence from modern medicine.' },
+  { no: 'EP2', zh: '红枣、枸杞、黄芪：真补还是伪补？', en: 'Red dates, goji, astragalus: real tonic or placebo?', d_zh: '红枣补脾生血，枸杞是长线补养，黄芪体质不对会“补成上火”。', d_en: 'Dates support the spleen, goji works slowly, and astragalus can backfire for the wrong constitution.' },
+  { no: 'EP3', zh: '人参与黄芪：总电闸和防火墙', en: 'Ginseng and astragalus: the power switch and the firewall', d_zh: '从古书到临床，把神话拆回人话。', d_en: 'From classical texts to the clinic, turning myths back into plain language.' },
+  { no: 'EP4', zh: '嗓子坏了喝什么：胖大海、罗汉果、薄荷、桉树叶', en: 'A sore throat: malva nut, monk fruit, mint, eucalyptus', d_zh: '别把所有东西都叫“润喉好东西”。', d_en: 'Not everything is a good throat remedy.' },
+  { no: 'EP5', zh: '为什么总是睡不着？', en: 'Why can’t you sleep?', d_zh: '从“心肝脾”、生物钟，到厨房里的那一点温柔。', d_en: 'Heart, liver and spleen, the body clock, and a little kindness from the kitchen.' },
+  { no: 'EP6', zh: '解码肥胖（上 · 下）', en: 'Decoding obesity (parts 1 and 2)', d_zh: '吃、动、睡，修复代谢而不是虐待自己。', d_en: 'Eat, move, sleep: repair your metabolism instead of punishing yourself.' },
+];
+const L = () => document.documentElement.dataset.lang;
+let filter = 'all';
+function render() {
+  const lang = L();
+  document.getElementById('terms').innerHTML = TERMS.filter(t => filter === 'all' || t.t === filter).map((t, i) => `
+    <button class="term" aria-pressed="false" aria-label="${t[lang]}">
+      <div class="inner">
+        <div class="face front"><b>${t.zh}</b><i>${lang === 'en' ? t.en : (t.t === 'herb' ? '药材' : '证候')}</i><small>${lang === 'en' ? 'Tap to translate →' : '点击翻译 →'}</small></div>
+        <div class="face back"><em>${lang === 'en' ? 'In modern terms' : '现代医学怎么说'}</em>${lang === 'en' ? t.back_en : t.back_zh}</div>
+      </div></button>`).join('');
+  document.querySelectorAll('.term').forEach(b => b.addEventListener('click', () => b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true')));
+  document.getElementById('eps').innerHTML = EPS.map(e => `<li><span class="no">${e.no}</span><div><b>${lang === 'en' ? e.en : e.zh}</b><p>${lang === 'en' ? e.d_en : e.d_zh}</p></div></li>`).join('');
+}
+function setLang(l) {
+  document.documentElement.dataset.lang = l; document.documentElement.lang = l === 'zh' ? 'zh-CN' : 'en';
+  document.getElementById('lzh').setAttribute('aria-pressed', l === 'zh'); document.getElementById('len').setAttribute('aria-pressed', l === 'en');
+  try { localStorage.setItem('tcm.lang', l); } catch (_) {}
+  render();
+}
+document.getElementById('lzh').addEventListener('click', () => setLang('zh'));
+document.getElementById('len').addEventListener('click', () => setLang('en'));
+document.querySelector('.filters').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; filter = b.dataset.f; document.querySelectorAll('.filters button').forEach(x => x.setAttribute('aria-pressed', x === b)); render(); });
+let saved = 'zh'; try { saved = localStorage.getItem('tcm.lang') || 'zh'; } catch (_) {}
+setLang(saved);
+</script>
+</body>
+</html>
