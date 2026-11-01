@@ -52,8 +52,8 @@ h1 span{display:block;background:linear-gradient(90deg,var(--cyan),var(--green) 
 .wrap{max-width:1000px;margin:0 auto;padding:12px max(18px,env(safe-area-inset-left)) 80px max(18px,env(safe-area-inset-right))}
 h2{font:500 12px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);margin:64px 0 16px;display:flex;align-items:center;gap:12px}
 h2::after{content:"";flex:1;height:1px;background:var(--line)}
-.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media (max-width:760px){.cards{grid-template-columns:1fr}}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:960px){.cards{grid-template-columns:1fr}}
 a.card{position:relative;display:flex;flex-direction:column;gap:8px;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;overflow:hidden;transition:border-color .2s,transform .2s}
 a.card::before{content:"";position:absolute;inset:-1px;border-radius:14px;padding:1px;background:linear-gradient(135deg,var(--cyan),transparent 40%,transparent 60%,var(--amber));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .2s}
 a.card:hover{transform:translateY(-2px)} a.card:hover::before{opacity:1}
