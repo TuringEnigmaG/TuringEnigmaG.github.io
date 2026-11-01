@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Momentum, Tested Honestly · Gloria Liu</title>
+<meta name="description" content="A research-to-paper-trading system for China A-shares and US equities: one strategy survived walk-forward validation, the rest were dropped.">
+<link rel="icon" href="../brand/biggmark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column with full-width figures; numbers in mono, headings in a condensed grotesque */
+:root{
+  --bg:#F5F6F4; --paper:#FFFFFF; --ink:#12161A; --ink-2:#4B535C; --ink-3:#848C95; --line:#DDE1E3;
+  --strat:#0E7A63; --bench:#9AA3AB; --neg:#C2412D; --warn:#B7791F; --hi:#E8F3EF;
+  --display:"Bricolage Grotesque",system-ui,sans-serif; --body:"Source Sans 3",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0E1113; --paper:#161A1D; --ink:#E9EDEF; --ink-2:#AEB6BD; --ink-3:#7A838B; --line:#262C31;
+  --strat:#3CC79F; --bench:#5E6870; --neg:#F07B66; --warn:#E3A84A; --hi:#13261F; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 var(--body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:780px;margin:0 auto;padding:40px max(18px,env(safe-area-inset-left)) 80px max(18px,env(safe-area-inset-right))}
+.wide{max-width:1040px;margin-left:auto;margin-right:auto}
+a{color:var(--strat)}
+nav{font:500 13px var(--mono);color:var(--ink-3);display:flex;justify-content:space-between;gap:12px;margin-bottom:48px}
+nav a{color:var(--ink-3);text-decoration:none} nav a:hover{color:var(--ink)}
+.kicker{font:500 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--strat);margin:0 0 12px}
+h1{font:800 clamp(38px,6.4vw,62px)/1.02 var(--display);letter-spacing:-.025em;margin:0 0 18px;text-wrap:balance}
+h2{font:600 26px/1.2 var(--display);letter-spacing:-.01em;margin:56px 0 12px;text-wrap:balance}
+h3{font:600 18px/1.3 var(--body);margin:26px 0 6px}
+p{margin:0 0 14px} .lede{font-size:20px;color:var(--ink-2);max-width:62ch}
+.meta{font:13px var(--mono);color:var(--ink-3);margin-top:18px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:34px 0 10px}
+.tile{background:var(--paper);padding:16px 16px 14px}
+.tile b{display:block;font:800 30px/1.1 var(--display);font-variant-numeric:tabular-nums}
+.tile span{font-size:13px;color:var(--ink-3)}
+.tile small{font:12px var(--mono);color:var(--ink-3)}
+@media (max-width:700px){.tiles{grid-template-columns:repeat(2,1fr)}}
+figure{margin:26px 0;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:18px 18px 12px}
+figcaption{font-size:14px;color:var(--ink-3);margin-top:8px}
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--ink-2);margin-bottom:8px}
+.legend i{display:inline-block;width:18px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.tip{position:absolute;pointer-events:none;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:6px 9px;font:12px/1.5 var(--mono);box-shadow:0 4px 14px rgba(0,0,0,.12);white-space:nowrap}
+table{border-collapse:collapse;width:100%;font-size:15px}
+.tw{overflow-x:auto;margin:18px 0}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{font:500 12px var(--mono);letter-spacing:.05em;color:var(--ink-3);text-transform:uppercase}
+th:first-child,td:first-child{text-align:left}
+td{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:14px}
+td:first-child{font-family:var(--body);font-size:15px}
+tr.pick td{background:var(--hi)}
+.good{color:var(--strat)} .bad{color:var(--neg)}
+ul.clean{padding-left:20px;margin:0 0 14px} ul.clean li{margin-bottom:6px}
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:20px 0;font-size:14px}
+.flow div{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 11px;position:relative}
+.flow b{display:block;font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--strat);margin-bottom:3px}
+@media (max-width:760px){.flow{grid-template-columns:1fr 1fr}}
+.incident{display:grid;grid-template-columns:150px 1fr;gap:4px 18px;border-top:1px solid var(--line);padding:12px 0;font-size:15.5px}
+.incident b{font-weight:600}
+.incident span{font:12px var(--mono);color:var(--ink-3)}
+@media (max-width:600px){.incident{grid-template-columns:1fr}}
+.note{border-left:3px solid var(--warn);padding:8px 14px;background:var(--paper);border-radius:0 8px 8px 0;font-size:15.5px;color:var(--ink-2);margin:18px 0}
+footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-size:14px;color:var(--ink-3)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav><a href="../">← Gloria Liu</a><span>Case study · 2026</span></nav>
+
+  <p class="kicker">Quant research · Python · Claude Code</p>
+  <h1>Momentum, tested honestly</h1>
+  <p class="lede">I built a research-to-paper-trading system for China A-shares and US equities. Most ideas I tested failed walk-forward validation, and I dropped them. One survived: weekly momentum rotation across 18 Chinese sector ETFs. It now trades on paper every day, run by scheduled cloud agents.</p>
+  <p class="meta">Sep–Oct 2026 · solo project · paper trading only, no real money</p>
+
+  <div class="tiles" id="tiles"></div>
+  <p style="font-size:14px;color:var(--ink-3)">Out-of-sample = the second half of the data (Mar 2024 – Oct 2026), which played no part in choosing the strategy. Benchmark = equal-weight buy-and-hold of the same 18 ETFs.</p>
+
+  <figure class="wide">
+    <div class="legend"><span><i style="background:var(--strat)"></i>Strategy: weekly sector rotation</span><span><i style="background:var(--bench)"></i>Benchmark: equal-weight buy-and-hold</span><span><i style="background:var(--ink-3);height:1px"></i>In-sample | out-of-sample split</span></div>
+    <div class="chart" id="mainChart"></div>
+    <figcaption>Growth of 1 unit of capital, Jul 2021 – Oct 2026, after trading costs. Hover to read values.</figcaption>
+  </figure>
+
+  <h2>The strategy</h2>
+  <ul class="clean">
+    <li><b>Universe.</b> 18 Chinese sector and theme ETFs: semiconductors, banks, brokers, coal, liquor, new-energy vehicles and others.</li>
+    <li><b>Signal.</b> Risk-adjusted momentum over 20, 60 and 120 trading days, plus a 60-day trend filter. An ETF in a downtrend can't be bought, however strong its recent bounce.</li>
+    <li><b>Portfolio.</b> Hold the top 3, at most 40% each. Cash is allowed: when the trend filter rejects everything, the strategy sits out.</li>
+    <li><b>Risk.</b> −8% stop-loss per position, executed at the next open.</li>
+    <li><b>Rebalance.</b> On the last trading day of each week, using the official exchange calendar.</li>
+  </ul>
+
+  <h2>Making the backtest hard to fool</h2>
+  <p>Most backtests look good because they quietly assume things that can't happen in real trading. I removed the ones I could find:</p>
+  <ul class="clean">
+    <li><b>No look-ahead.</b> Signals use the close; orders fill at the <em>next day's open</em>.</li>
+    <li><b>Real costs.</b> Commissions, 5 bp slippage and stamp tax where it applies.</li>
+    <li><b>Real constraints.</b> China's 100-share lot size, and only buying what the cash on hand can afford.</li>
+    <li><b>Real calendar.</b> Rebalance days come from official exchange calendars, so holidays shift them correctly.</li>
+    <li><b>One rule for every idea.</b> Split the history in half. If an idea doesn't beat its benchmark on the second half, it's dropped, however good the first half looks.</li>
+  </ul>
+
+  <h2>Rebalancing frequency decides everything</h2>
+  <p>The same signal gives very different results depending on how often you act on it. Daily rebalancing chases noise: with only 18 candidates, rankings flip constantly and trading costs pile up. Monthly looks best out of sample but was the worst in-sample, which is a sign of instability. Weekly was the only setting that beat the benchmark in <em>both</em> halves.</p>
+  <div class="tw" id="freqTable"></div>
+
+  <h2>What failed, and why it matters</h2>
+  <p>Dropping ideas is the main output of research. These all looked reasonable and all failed the same out-of-sample rule:</p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Idea</th><th>What happened</th></tr></thead>
+      <tbody id="failTable"></tbody>
+    </table>
+  </div>
+
+  <h2>From backtest to daily paper trading</h2>
+  <p>The paper-trading system reuses the backtest's own functions, so live behavior can't drift from what was validated. Every trading day:</p>
+  <div class="flow">
+    <div><b>1 · Data</b>Prices after the close, with a check that today's bars are final</div>
+    <div><b>2 · Signal</b>Same momentum and trend code as the backtest</div>
+    <div><b>3 · Plan</b>Next-day orders written to plan.json</div>
+    <div><b>4 · Fill</b>Next open, with costs, lot sizes and stop-losses</div>
+    <div><b>5 · Record</b>State and history committed to Git</div>
+  </div>
+  <p>It runs on scheduled cloud agents: one after the China close, one after the US close, and one that writes a daily report with the next day's plan and news-risk flags. A missed day is replayed automatically on the next run, so a sleeping laptop can't skip a rebalance.</p>
+
+  <h3>What broke in production, and the fix</h3>
+  <p>Running daily surfaced problems a backtest never shows. A few of them:</p>
+  <div id="incidents"></div>
+
+  <h2>Live paper results so far</h2>
+  <figure>
+    <div class="legend"><span><i style="background:var(--strat)"></i>China sector rotation</span><span><i style="background:var(--warn)"></i>US tech + low P/E (did not pass walk-forward; run as an experiment)</span><span><i style="background:var(--bench)"></i>SPY buy-and-hold</span></div>
+    <div class="chart" id="paperChart"></div>
+    <figcaption>Paper equity, each normalized to 1 on its start date.</figcaption>
+  </figure>
+  <p id="paperText"></p>
+  <div class="note">Five weeks is far too short to judge a strategy. These numbers are here because I committed to publishing results whatever they turned out to be, not because they prove anything yet.</div>
+
+  <h2>How I worked with Claude Code</h2>
+  <p>I wrote this system with Claude Code as a pair programmer. The split of work was clear:</p>
+  <ul class="clean">
+    <li><b>I set the research rules</b>: the out-of-sample gate, which ideas to try, when to drop one, and how much drawdown I'd accept.</li>
+    <li><b>The agent wrote and ran most of the code</b>: data clients, the backtest engine, the paper-trading loop and the scheduled jobs.</li>
+    <li><b>We debugged together from logs.</b> Every incident above was diagnosed by reading run logs and data, then fixed and re-run on the exact case that failed.</li>
+  </ul>
+  <p>The core system was working within days. What made it trustworthy was the rule about what counts as evidence, not the speed.</p>
+
+  <h2>What I took away</h2>
+  <ul class="clean">
+    <li>An honest backtest is mostly a list of things you refused to assume.</li>
+    <li>Parameters that matter, such as rebalancing frequency, should be chosen for stability across periods, not for the best single number.</li>
+    <li>Production surfaces a different class of bugs: stale data, calendars, time zones, network rules. Budget time for them.</li>
+  </ul>
+
+  <footer>
+    Gloria Liu · <a href="../">Portfolio</a><br>
+    Paper trading only, not investment advice. Backtests cover Jul 2021 – Oct 2026 and are recomputed with the same engine the paper-trading system uses. Code is in a private repository; happy to walk through it in an interview.
+  </footer>
+</div>
+
+<script src="data.js"></script>
+<script>
+// Chart and table rendering for the case study
+const Q = window.QUANT;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const pct = (v, d = 1) => (v * 100).toFixed(d) + '%';
+const fix = (v, d = 2) => v.toFixed(d);
+
+// Hero tiles
+const C = Q.cnMetrics;
+document.getElementById('tiles').innerHTML = [
+  [fix(C.out.sharpe), 'Out-of-sample Sharpe', `benchmark ${fix(C.bench_out.sharpe)}`],
+  [pct(C.out.ret), 'Out-of-sample annual return', `benchmark ${pct(C.bench_out.ret)}`],
+  [fix(C.in.sharpe), 'In-sample Sharpe', `benchmark ${fix(C.bench_in.sharpe)}`],
+  [pct(C.full.mdd, 0), 'Worst drawdown, full period', `benchmark ${pct(C.bench_full.mdd, 0)}`],
+].map(([v, l, s]) => `<div class="tile"><b>${v}</b><span>${l}</span><br><small>${s}</small></div>`).join('');
+
+// Minimal SVG line chart with hover readout
+function lineChart(el, dates, series, opts = {}) {
+  const W = 1000, H = opts.h || 360, L = 48, R = 14, T = 12, B = 30;
+  const all = series.flatMap(s => s.values.filter(v => v != null));
+  let lo = Math.min(...all), hi = Math.max(...all); const pad = (hi - lo) * .06; lo -= pad; hi += pad;
+  const x = i => L + i / (dates.length - 1) * (W - L - R);
+  const y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+  const ticks = []; const step = (hi - lo) / 4; for (let k = 0; k <= 4; k++) ticks.push(lo + k * step);
+  const years = []; let last = '';
+  dates.forEach((d, i) => { const yy = opts.monthTicks ? d.slice(0, 7) : d.slice(0, 4); if (yy !== last) { years.push([i, opts.monthTicks ? d.slice(5, 10) : yy]); last = yy; } });
+  const path = s => { let p = '', pen = false; s.values.forEach((v, i) => { if (v == null) return; p += (pen ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1); pen = true; }); return p; };
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opts.label || ''}">`;
+  ticks.forEach(t => svg += `<line x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)"/><text x="${L - 8}" y="${y(t) + 4}" text-anchor="end" font-size="12" font-family="JetBrains Mono,monospace" fill="var(--ink-3)">${t.toFixed(2)}</text>`);
+  years.forEach(([i, lab]) => { if (i > 0 || opts.monthTicks) svg += `<text x="${x(i)}" y="${H - 8}" text-anchor="middle" font-size="12" font-family="JetBrains Mono,monospace" fill="var(--ink-3)">${lab}</text>`; });
+  if (opts.base != null) svg += `<line x1="${L}" x2="${W - R}" y1="${y(opts.base)}" y2="${y(opts.base)}" stroke="var(--ink-3)" stroke-dasharray="2 4"/>`;
+  if (opts.split) { const si = dates.indexOf(opts.split); svg += `<line x1="${x(si)}" x2="${x(si)}" y1="${T}" y2="${H - B}" stroke="var(--ink-3)" stroke-dasharray="4 4"/><text x="${x(si) + 6}" y="${T + 12}" font-size="12" font-family="JetBrains Mono,monospace" fill="var(--ink-3)">out-of-sample →</text>`; }
+  series.forEach(s => svg += `<path d="${path(s)}" fill="none" stroke="${s.color}" stroke-width="${s.w || 2}" stroke-linejoin="round"/>`);
+  svg += `<line id="cross" x1="0" x2="0" y1="${T}" y2="${H - B}" stroke="var(--ink-3)" visibility="hidden"/>`;
+  series.forEach((s, k) => svg += `<circle data-k="${k}" r="4" fill="${s.color}" visibility="hidden"/>`);
+  svg += `<rect x="${L}" y="${T}" width="${W - L - R}" height="${H - T - B}" fill="transparent"/></svg><div class="tip" hidden></div>`;
+  el.innerHTML = svg;
+  const s = el.querySelector('svg'), tip = el.querySelector('.tip'), cross = s.querySelector('#cross');
+  const move = e => {
+    const r = s.getBoundingClientRect(), px = (e.clientX - r.left) / r.width * W;
+    const i = Math.max(0, Math.min(dates.length - 1, Math.round((px - L) / (W - L - R) * (dates.length - 1))));
+    cross.setAttribute('x1', x(i)); cross.setAttribute('x2', x(i)); cross.setAttribute('visibility', 'visible');
+    let html = `<b>${dates[i]}</b>`;
+    series.forEach((se, k) => { const c = s.querySelector(`circle[data-k="${k}"]`), v = se.values[i];
+      if (v == null) { c.setAttribute('visibility', 'hidden'); return; }
+      c.setAttribute('cx', x(i)); c.setAttribute('cy', y(v)); c.setAttribute('visibility', 'visible');
+      html += `<br><span style="color:${se.color}">●</span> ${se.name} ${v.toFixed(3)}`; });
+    tip.innerHTML = html; tip.hidden = false;
+    const left = (x(i) / W) * r.width; tip.style.left = Math.min(left + 12, r.width - tip.offsetWidth) + 'px'; tip.style.top = '10px';
+  };
+  s.addEventListener('pointermove', move);
+  s.addEventListener('pointerleave', () => { tip.hidden = true; cross.setAttribute('visibility', 'hidden'); s.querySelectorAll('circle').forEach(c => c.setAttribute('visibility', 'hidden')); });
+}
+
+function draw() {
+  const M = Q.main;
+  lineChart(document.getElementById('mainChart'), M.dates, [
+    { name: 'Benchmark', values: M.benchmark, color: css('--bench') },
+    { name: 'Strategy', values: M.strategy, color: css('--strat'), w: 2.4 },
+  ], { split: M.split, base: 1, label: 'Strategy versus benchmark equity, 2021 to 2026' });
+
+  // 模拟盘三条线按日期对齐，各自以起始日归一
+  const P = Q.paper, all = [...new Set([...P.cn.dates, ...P.us.dates, ...P.spy.dates])].sort();
+  const norm = s => { const m = new Map(s.dates.map((d, i) => [d, s.equity[i] / s.equity[0]])); return all.map(d => m.has(d) ? m.get(d) : null); };
+  lineChart(document.getElementById('paperChart'), all, [
+    { name: 'SPY', values: norm(P.spy), color: css('--bench') },
+    { name: 'US tech+low P/E', values: norm(P.us), color: css('--warn') },
+    { name: 'China rotation', values: norm(P.cn), color: css('--strat'), w: 2.4 },
+  ], { h: 260, base: 1, monthTicks: true, label: 'Paper trading equity since September 2026' });
+}
+draw();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw);
+
+// Frequency table
+const F = Q.freq, names = { D: 'Daily', 'W-FRI': 'Weekly (chosen)', M: 'Monthly' };
+const cell = (v, b) => `<span class="${v > b ? 'good' : 'bad'}">${fix(v)}</span> <span style="color:var(--ink-3)">vs ${fix(b)}</span>`;
+document.getElementById('freqTable').innerHTML = `<table><thead><tr><th>Rebalance</th><th>In-sample Sharpe</th><th>Out-of-sample Sharpe</th><th>Full-period max drawdown</th></tr></thead><tbody>` +
+  ['D', 'W-FRI', 'M'].map(f => `<tr class="${f === 'W-FRI' ? 'pick' : ''}"><td>${names[f]}</td><td>${cell(F[f].in.sharpe, F[f].bench_in.sharpe)}</td><td>${cell(F[f].out.sharpe, F[f].bench_out.sharpe)}</td><td>${pct(F[f].full.mdd, 0)}</td></tr>`).join('') +
+  `</tbody></table><p style="font-size:14px;color:var(--ink-3);margin-top:8px">Green = beats the benchmark in that period. Only weekly is green in both.</p>`;
+
+// Failed ideas
+const U = Q.us;
+document.getElementById('failTable').innerHTML = [
+  ['Same rotation on 11 US sector ETFs', `Out-of-sample Sharpe <span class="bad">${fix(U.out.sharpe)}</span> vs benchmark ${fix(U.bench_out.sharpe)}, at weekly, daily and monthly frequency alike. US sectors are too efficient for this signal.`],
+  ['Momentum on individual stocks', 'The headline Sharpe looked great (around 1.0 for a tech-stock version), but almost all of the edge came from the post-2024 tech rally. In 2021–2024 it often lagged simply holding the same stocks.'],
+  ['Dual momentum across asset classes (SPY / EFA / bonds)', 'Positive in every period, but lagged plain SPY buy-and-hold (full-period Sharpe 0.67 vs 0.76). Kept in the codebase, not deployed.'],
+  ['Risk parity and volatility targeting', 'Cut exposure after volatile periods, which meant selling into the sharp rebounds that followed. Net negative.'],
+  ['Buying IPOs on day one, selling on a target gain', 'Tested on 418 US IPOs from 2022–2024 with 3%, 5%, 10% and 20% targets. Every version lost money on average (−16% to −18%), dragged down by a few collapses.'],
+  ['Mean reversion ("buy the dip") on the same 18 ETFs', 'Tested 7 variants. Every daily version lost money in both halves (Sharpe −0.45 to −0.59); the best weekly version reached a full-period Sharpe of only 0.09. Chinese sectors trend; they don\u2019t revert.'],
+].map(([a, b]) => `<tr><td style="white-space:normal">${a}</td><td style="white-space:normal;text-align:left;font-family:var(--body);font-size:15px">${b}</td></tr>`).join('');
+
+// Production incidents
+document.getElementById('incidents').innerHTML = [
+  ['Stale cache', 'The first scheduled run read cached prices from the day before, decided it had already run, and silently did nothing.', 'Cache now checks it actually contains the latest trading day.'],
+  ['Missed rebalance', 'The laptop slept for several days. The original design only processed "today", so it would have skipped the first real rebalance entirely.', 'Each run replays every missed trading day in order.'],
+  ['Wrong rebalance day', 'Paper trading used "every Friday"; the backtest used "last trading day of the week". On holiday weeks they disagreed.', 'Both now call the same calendar function.'],
+  ['Duplicate bookings', 'US timestamps kept a 04:00 time component, so date comparisons treated the same day as new and booked it twice.', 'Normalize timestamps to dates at the source.'],
+  ['Silent 403s in the cloud', 'Scheduled cloud runs could not reach market-data hosts behind the sandbox network allow-list. Nothing crashed; data just stopped.', 'Added the exact hosts; moved the exchange calendar into the repo so cloud runs need one less host.'],
+  ['Half-finished daily bars', 'Some ETFs had not published the day’s bar at run time, and forward-filling turned "missing" into "unchanged".', 'Drop bars before a data-ready time; fail loudly if anything is still missing.'],
+].map(([t, w, f]) => `<div class="incident"><b>${t}</b><div>${w}<br><span>Fix: ${f}</span></div></div>`).join('');
+
+// Paper text
+const last = s => s.equity[s.equity.length - 1] / s.equity[0] - 1;
+const P = Q.paper;
+document.getElementById('paperText').innerHTML = `Through ${P.cn.dates[P.cn.dates.length - 1]}: China rotation <b>${pct(last(P.cn))}</b>, the US tech + low P/E experiment (which never passed walk-forward) <b>${pct(last(P.us))}</b>, and SPY buy-and-hold <b>${pct(last(P.spy))}</b>. The China strategy spent much of October mostly in cash, because the trend filter rejected most sectors.`;
+</script>
+</body>
+</html>

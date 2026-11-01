@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Token Trace · Gloria Liu</title>
+<meta name="description" content="Pick a price per million tokens and watch it flow through demand, usage, revenue, GPU cost and gross margin. An interactive, illustrative model of usage-based AI pricing.">
+<link rel="icon" href="../brand/biggmark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: control-room look, dark by design. Header → KPI and guardrails → controls + flow graph → trace tables → how it works */
+:root{
+  color-scheme:dark;
+  --bg:#0A0D10; --panel:#11161B; --panel-2:#171D23; --ink:#E8EDF1; --ink-2:#A9B3BC; --ink-3:#6F7A84; --line:#222A31; --line-2:#323C45;
+  --vein:#2F6F86; --particle:#5EC8E5; --trace:#FFB347; --trace-soft:#2A2113; --ok:#46D19A; --ok-soft:#10261C; --bad:#FF6B5B; --bad-soft:#2C1513;
+  --display:"Bricolage Grotesque",system-ui,sans-serif; --body:"Source Sans 3",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1400px;margin:0 auto;padding:28px max(16px,env(safe-area-inset-left)) 64px max(16px,env(safe-area-inset-right));display:flex;flex-direction:column;gap:14px}
+a{color:var(--particle)}
+nav{font:500 13px var(--mono);display:flex;justify-content:space-between;color:var(--ink-3)} nav a{color:var(--ink-3);text-decoration:none} nav a:hover{color:var(--ink)}
+.head{display:grid;grid-template-columns:auto 1fr;gap:12px 40px;align-items:end;margin-top:10px}
+@media (max-width:860px){.head{grid-template-columns:1fr}}
+.kicker{font:500 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--trace);margin:0 0 8px}
+h1{font:800 clamp(48px,7vw,86px)/.9 var(--display);letter-spacing:-.03em;margin:0;text-transform:uppercase}
+h1 span{color:var(--particle);display:block}
+.lede{color:var(--ink-2);max-width:62ch;margin:0;font-size:16px}
+.chip{display:inline-block;margin-top:10px;font:12px var(--mono);color:var(--trace);border:1px solid var(--trace);border-radius:4px;padding:2px 8px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--particle);outline-offset:2px}
+.kpis{display:flex;flex-wrap:wrap;align-items:center;gap:10px 26px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+.kpi label{display:block;font-size:11.5px;color:var(--ink-3)}
+.kpi b{font:800 26px/1.05 var(--display);font-variant-numeric:tabular-nums}
+.kpi b small{font:400 11.5px var(--mono);margin-left:6px}
+.up{color:var(--ok)} .dn{color:var(--bad)} .flat{color:var(--ink-3)}
+.gates{display:flex;flex-wrap:wrap;gap:6px;flex:1;min-width:0}
+.gate{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px;font:11.5px var(--mono);border:1px solid var(--ok);color:var(--ok);background:var(--ok-soft);white-space:nowrap}
+.gate.fail{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.gate i{width:7px;height:7px;transform:rotate(45deg);background:currentColor;display:inline-block}
+select{font:12px var(--mono);background:var(--panel-2);color:var(--ink);border:1px solid var(--line-2);border-radius:5px;padding:3px 6px}
+.ctl{font-size:12px;color:var(--ink-2);display:flex;gap:8px;align-items:center}
+.main{display:grid;grid-template-columns:minmax(320px,370px) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:980px){.main{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:13px;min-width:0}
+.card h2{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:0;display:flex;justify-content:space-between;gap:8px}
+.card h2 span{letter-spacing:0;text-transform:none;font:12px var(--body)}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.tabs button{border:1px solid var(--line-2);background:var(--panel-2);border-radius:7px;padding:8px 4px 6px;display:flex;flex-direction:column;align-items:center}
+.tabs button b{font:600 15px var(--display)}
+.tabs button small{font:11px var(--mono);color:var(--ink-3)}
+.tabs button[aria-pressed="true"]{border-color:var(--trace);background:var(--trace-soft);box-shadow:inset 0 -2px 0 var(--trace)}
+.slider{display:flex;flex-direction:column;gap:3px}
+.slider .lab{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px}
+.slider .lab b{font:800 22px var(--display);color:var(--trace);font-variant-numeric:tabular-nums}
+.slider .lab b.n{font-size:17px;color:var(--ink)}
+.hint{font-size:11.5px;color:var(--ink-3)}
+input[type=range]{width:100%;accent-color:var(--trace)}
+.curve svg{display:block;width:100%;height:auto}
+.btns{display:flex;flex-wrap:wrap;gap:6px}
+.btn{border:1px solid var(--line-2);background:var(--panel-2);border-radius:6px;padding:6px 11px;font-size:13px}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primary{background:var(--trace);color:#1A1306;border-color:var(--trace);font-weight:600}
+.msg{font-size:12.5px;color:var(--ink-2);min-height:1.5em}
+.flowhead{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:13.5px}
+.pill{font:500 11px var(--mono);letter-spacing:.1em;background:var(--particle);color:#062029;border-radius:4px;padding:2px 8px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--ink-3);margin-left:auto}
+.legend i{display:inline-block;width:18px;height:3px;border-radius:2px;background:var(--vein);margin-right:6px;vertical-align:middle}
+.legend i.t{background:var(--trace)}
+.flowbox{position:relative;overflow-x:auto}
+#flow{display:block;width:100%;min-width:760px;height:560px;cursor:crosshair}
+.tip{position:absolute;pointer-events:none;background:var(--panel-2);border:1px solid var(--line-2);border-radius:6px;padding:7px 9px;font:11px/1.55 var(--mono);white-space:nowrap;z-index:3}
+.tables{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:14px;align-items:start}
+@media (max-width:1100px){.tables{grid-template-columns:1fr}}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:480px}
+th{font:400 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);text-align:right;padding:6px 8px;border-bottom:1px solid var(--line-2);white-space:nowrap}
+td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;font:13px var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+th:first-child,td:first-child{text-align:left} td:first-child{font-family:var(--body)}
+tr.on td{background:var(--trace-soft)}
+td small{display:block;font-size:10px}
+.explain{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:900px){.explain{grid-template-columns:1fr}}
+.explain h3{font:600 17px var(--display);margin:0 0 6px}
+.explain p,.explain li{color:var(--ink-2);font-size:14.5px;margin:0 0 8px}
+.explain ul{padding-left:18px;margin:0}
+footer{font-size:13px;color:var(--ink-3);border-top:1px solid var(--line);padding-top:14px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav><a href="../">← Gloria Liu</a><span>Interactive model · 2026</span></nav>
+
+  <header class="head">
+    <div>
+      <p class="kicker">Usage-based AI pricing</p>
+      <h1>Token<span>Trace</span></h1>
+    </div>
+    <div>
+      <p class="lede">Pick a price per million tokens and watch it flow through demand, usage by customer segment, revenue, GPU cost and gross margin, then into four guardrails. It's the kind of what-if a pricing team argues about every quarter, made visible.</p>
+      <span class="chip">Illustrative model: every number is a made-up assumption, not any company's data</span>
+    </div>
+  </header>
+
+  <section class="kpis" aria-label="Portfolio metrics and guardrails">
+    <div class="kpi"><label>Revenue / month</label><b id="kRev">–</b></div>
+    <div class="kpi"><label>Gross margin</label><b id="kGm">–</b></div>
+    <div class="kpi"><label>GPU utilization</label><b id="kUtil">–</b></div>
+    <div class="kpi"><label>Active developers</label><b id="kDev">–</b></div>
+    <div class="gates" id="gates"></div>
+    <label class="ctl" for="elastic">Price sensitivity <select id="elastic"><option value="0.7">low</option><option value="1" selected>base</option><option value="1.4">high</option></select></label>
+  </section>
+
+  <div class="main">
+    <aside class="card" aria-label="Pricing controls">
+      <h2>Model tier <span>pick one, then set its price</span></h2>
+      <div class="tabs" id="tabs"></div>
+      <div class="slider">
+        <div class="lab"><span id="selLabel">–</span><b id="selVal">–</b></div>
+        <input type="range" id="price" min="30" max="200" step="1" aria-label="Selected tier price as a percent of list price">
+        <div class="lab hint"><span id="pLo"></span><span id="pBase"></span><span id="pHi"></span></div>
+      </div>
+      <div class="curve">
+        <h2>As this price moves <span><span style="color:var(--particle)">revenue</span> · <span style="color:var(--trace)">gross margin</span></span></h2>
+        <svg id="curve" viewBox="0 0 340 150" role="img" aria-label="Revenue and gross margin as the selected tier price changes"></svg>
+      </div>
+      <div class="slider">
+        <div class="lab"><span>Consumer plan, per month</span><b class="n" id="subVal">–</b></div>
+        <input type="range" id="sub" min="10" max="40" step="1" aria-label="Consumer plan monthly price">
+      </div>
+      <div class="slider">
+        <div class="lab"><span>Enterprise discount</span><b class="n" id="discVal">–</b></div>
+        <input type="range" id="disc" min="0" max="50" step="1" aria-label="Enterprise discount percent">
+      </div>
+      <div>
+        <h2 style="margin-bottom:8px">Scenarios</h2>
+        <div class="btns" id="scenarios"></div>
+      </div>
+      <div class="btns">
+        <button class="btn primary" id="solve">Find the best price for this tier</button>
+        <button class="btn" id="reset">Reset all</button>
+      </div>
+      <div class="msg" id="msg">The solver searches this tier's price for the highest gross profit that still passes every guardrail.</div>
+    </aside>
+
+    <section class="card" aria-label="Flow graph">
+      <div class="flowhead"><span class="pill">FORWARD</span><span>price → demand → tokens → revenue and cost → margin → guardrails</span>
+        <div class="legend"><span><i></i>token flow</span><span><i class="t"></i>path of your change</span></div></div>
+      <div class="flowbox"><canvas id="flow" aria-label="Flow from the selected tier's price, through customer segments, into revenue, compute cost, gross profit and four guardrails. Hover nodes for detail."></canvas><div class="tip" id="tip" hidden></div></div>
+    </section>
+  </div>
+
+  <div class="tables">
+    <section class="card"><h2>Trace · before → after <span id="chg"></span></h2><div class="tw"><table id="trace"></table></div></section>
+    <section class="card"><h2>By customer segment <span>Δ vs list prices</span></h2><div class="tw"><table id="segTable"></table></div></section>
+  </div>
+
+  <section class="card explain">
+    <div><h3>How the model works</h3>
+      <ul>
+        <li>Three model tiers, each with a list price and a compute cost per million tokens.</li>
+        <li>Five customer segments react differently: developers are price-sensitive, enterprises much less so, and coding agents sit in between but use the most tokens.</li>
+        <li>Raising one tier's price pushes some usage to the neighboring tiers instead of losing it entirely.</li>
+        <li>Compute cost converts to GPU hours against a fixed monthly capacity.</li>
+      </ul></div>
+    <div><h3>The four guardrails</h3>
+      <ul>
+        <li><b>Gross margin ≥ 55%</b>: the business has to pay for itself.</li>
+        <li><b>GPU utilization ≤ 90%</b>: demand can't outrun capacity.</li>
+        <li><b>Active developers ≥ −5%</b>: price can't erode the ecosystem.</li>
+        <li><b>Revenue ≥ plan</b>: a price change can't shrink the top line.</li>
+      </ul></div>
+    <div><h3>What it shows (in this toy model)</h3>
+      <ul>
+        <li>A Frontier price war grows usage but breaks the margin floor first.</li>
+        <li>Raising the Mid price earns more from price-insensitive coding agents, yet loses enough developers to trip the ecosystem guardrail.</li>
+        <li>Cutting the Small price is the cheapest way to grow the developer base.</li>
+      </ul></div>
+  </section>
+
+  <footer>Built by Gloria Liu with Claude Code, adapted from Offer Trace, a tool I built for auto-finance pricing. Demand follows constant-elasticity curves with cross-tier substitution; all parameters are invented for illustration. <a href="../">More work →</a></footer>
+</div>
+
+<script>
+// ===================== Model（示例假设） =====================
+const TIERS = [
+  { id: 'S', name: 'Small', price: 1.0, cost: 0.30 },
+  { id: 'M', name: 'Mid', price: 6.0, cost: 2.4 },
+  { id: 'F', name: 'Frontier', price: 30.0, cost: 12.0 },
+];
+const GPU_HOUR = 2.5, CAPACITY_GPUH = 2.0e7;
+const SEGMENTS = [
+  { id: 'dev', name: 'Developers', base: [1100, 420, 85], e: 1.4, x: 0.5, ent: false, devs: 600 },
+  { id: 'startup', name: 'Startups', base: [840, 560, 170], e: 1.1, x: 0.5, ent: false, devs: 90 },
+  { id: 'agent', name: 'Coding agents', base: [140, 1120, 840], e: 0.8, x: 0.6, ent: false, devs: 160 },
+  { id: 'ent', name: 'Enterprise', base: [560, 840, 335], e: 0.5, x: 0.3, ent: true, devs: 40 },
+];
+const SUB = { base: 1.5, price: 20, e: 0.9, usage: [0.4, 1.2, 0.5] };
+const GATES = { gm: 55, util: 90, devDrop: -5 };
+
+function evaluate(st) {
+  const rel = TIERS.map((t, i) => st.price[i] / t.price);
+  const segs = SEGMENTS.map(s => {
+    const tokens = TIERS.map((t, i) => {
+      const nb = [i - 1, i + 1].filter(j => j >= 0 && j < TIERS.length);
+      const cross = nb.reduce((a, j) => a * Math.pow(rel[j], s.x * st.elastic / nb.length), 1);
+      return s.base[i] * Math.pow(rel[i], -s.e * st.elastic) * cross;
+    });
+    const eff = TIERS.map((t, i) => st.price[i] * (s.ent ? 1 - st.disc : 1));
+    const revenue = tokens.reduce((a, v, i) => a + v * eff[i], 0) / 1000;
+    const cost = tokens.reduce((a, v, i) => a + v * TIERS[i].cost, 0) / 1000;
+    const w = s.base.reduce((a, v) => a + v, 0);
+    const pIdx = s.base.reduce((a, v, i) => a + v * rel[i], 0) / w;
+    const devs = s.devs * Math.pow(pIdx, -0.6 * s.e * st.elastic);
+    return { id: s.id, name: s.name, tokens, total: tokens.reduce((a, v) => a + v, 0), revenue, cost, devs };
+  });
+  const subs = SUB.base * Math.pow(st.sub / SUB.price, -SUB.e * st.elastic);
+  const subTokens = SUB.usage.map(u => subs * u * 1000);
+  const subSeg = { id: 'sub', name: 'Consumer plans', tokens: subTokens, total: subTokens.reduce((a, v) => a + v, 0),
+    revenue: subs * st.sub, cost: subTokens.reduce((a, v, i) => a + v * TIERS[i].cost, 0) / 1000, devs: 0, subs };
+  const all = [...segs, subSeg];
+  const tierTokens = TIERS.map((_, i) => all.reduce((a, s) => a + s.tokens[i], 0));
+  const tierRev = TIERS.map((_, i) => all.reduce((a, s) => a + (s.id === 'sub' ? 0 : s.tokens[i] * st.price[i] * (s.id === 'ent' ? 1 - st.disc : 1) / 1000), 0));
+  const revenue = all.reduce((a, s) => a + s.revenue, 0), cost = all.reduce((a, s) => a + s.cost, 0);
+  const devs = segs.reduce((a, s) => a + s.devs, 0);
+  return { segs: all, tierTokens, tierRev, revenue, cost, gp: revenue - cost, gm: (revenue - cost) / revenue * 100,
+    util: cost * 1e6 / GPU_HOUR / CAPACITY_GPUH * 100, devs, subs, tokens: tierTokens.reduce((a, v) => a + v, 0) };
+}
+const baseState = (el = 1) => ({ price: TIERS.map(t => t.price), sub: SUB.price, disc: 0.2, elastic: el });
+function gatesOf(e, b) {
+  const dd = (e.devs / b.devs - 1) * 100;
+  return [
+    { id: 'gm', label: 'Gross margin', text: `${e.gm.toFixed(1)}% ≥ ${GATES.gm}%`, ok: e.gm >= GATES.gm },
+    { id: 'util', label: 'GPU utilization', text: `${e.util.toFixed(1)}% ≤ ${GATES.util}%`, ok: e.util <= GATES.util },
+    { id: 'dev', label: 'Developers', text: `${dd >= 0 ? '+' : ''}${dd.toFixed(1)}% ≥ ${GATES.devDrop}%`, ok: dd >= GATES.devDrop },
+    { id: 'rev', label: 'Revenue ≥ plan', text: `$${e.revenue.toFixed(1)}M ≥ $${b.revenue.toFixed(1)}M`, ok: e.revenue >= b.revenue - 1e-9 },
+  ];
+}
+
+// ===================== State =====================
+let state = baseState(), base, cur, sel = 2;
+const $ = id => document.getElementById(id);
+const usd = v => '$' + v.toFixed(1) + 'M';
+const sgn = (d, k = 1) => (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(k);
+const cls = (d, good = 1) => Math.abs(d) < 1e-9 ? 'flat' : ((d > 0) === (good > 0) ? 'up' : 'dn');
+const fmtP = v => v >= 10 ? '$' + v.toFixed(1) : '$' + v.toFixed(2);
+function recompute() { base = evaluate(baseState(state.elastic)); cur = evaluate(state); cur.gates = gatesOf(cur, base); }
+
+// ===================== Panels =====================
+function renderKpis() {
+  const d = (a, b) => a - b;
+  $('kRev').innerHTML = `${usd(cur.revenue)}<small class="${cls(d(cur.revenue, base.revenue))}">${sgn((cur.revenue / base.revenue - 1) * 100)}%</small>`;
+  $('kGm').innerHTML = `${cur.gm.toFixed(1)}%<small class="${cls(d(cur.gm, base.gm))}">${sgn(cur.gm - base.gm)}pp</small>`;
+  $('kUtil').innerHTML = `${cur.util.toFixed(0)}%<small class="${cls(d(cur.util, base.util), -1)}">${sgn(cur.util - base.util)}pp</small>`;
+  $('kDev').innerHTML = `${Math.round(cur.devs)}k<small class="${cls(d(cur.devs, base.devs))}">${sgn((cur.devs / base.devs - 1) * 100)}%</small>`;
+  $('gates').innerHTML = cur.gates.map(g => `<span class="gate ${g.ok ? '' : 'fail'}"><i></i>${g.label} ${g.text}</span>`).join('');
+}
+function renderControls() {
+  $('tabs').innerHTML = TIERS.map((t, i) => `<button data-i="${i}" aria-pressed="${i === sel}"><b>${t.name}</b><small>${fmtP(state.price[i])} / 1M</small></button>`).join('');
+  const t = TIERS[sel];
+  $('selLabel').textContent = `${t.name} price per 1M tokens`;
+  $('selVal').textContent = fmtP(state.price[sel]);
+  $('price').value = Math.round(state.price[sel] / t.price * 100);
+  $('pLo').textContent = fmtP(t.price * .3); $('pBase').textContent = 'list ' + fmtP(t.price); $('pHi').textContent = fmtP(t.price * 2);
+  $('sub').value = state.sub; $('subVal').innerHTML = '$' + state.sub + ` <small class="hint" style="font-family:var(--mono)">${(cur.subs).toFixed(2)}M subscribers</small>`;
+  $('disc').value = Math.round(state.disc * 100); $('discVal').textContent = Math.round(state.disc * 100) + '%';
+}
+function renderCurve() {
+  const t = TIERS[sel], pts = [];
+  for (let k = 0; k <= 40; k++) { const m = .3 + 1.7 * k / 40, s = { ...state, price: state.price.slice() }; s.price[sel] = t.price * m; const e = evaluate(s); pts.push({ m, r: e.revenue, g: e.gm }); }
+  const W = 340, H = 150, L = 36, R = 36, T = 10, B = 22;
+  const rMin = Math.min(...pts.map(p => p.r)), rMax = Math.max(...pts.map(p => p.r)), gMin = Math.min(...pts.map(p => p.g), GATES.gm - 2), gMax = Math.max(...pts.map(p => p.g));
+  const x = m => L + (m - .3) / 1.7 * (W - L - R), yr = v => T + (1 - (v - rMin) / (rMax - rMin || 1)) * (H - T - B), yg = v => T + (1 - (v - gMin) / (gMax - gMin || 1)) * (H - T - B);
+  const line = f => pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.m).toFixed(1)} ${f(p).toFixed(1)}`).join('');
+  const cm = state.price[sel] / t.price;
+  $('curve').innerHTML = `<rect x="${L}" y="${T}" width="${W - L - R}" height="${H - T - B}" fill="var(--panel-2)"/>
+    <line x1="${L}" x2="${W - R}" y1="${yg(GATES.gm)}" y2="${yg(GATES.gm)}" stroke="var(--bad)" stroke-dasharray="3 3" opacity=".7"/>
+    <text x="${W - R - 2}" y="${yg(GATES.gm) - 3}" text-anchor="end" font-size="8.5" font-family="JetBrains Mono,monospace" fill="var(--bad)">margin floor</text>
+    <line x1="${x(1)}" x2="${x(1)}" y1="${T}" y2="${H - B}" stroke="var(--ink-3)" stroke-dasharray="3 3"/>
+    <path d="${line(p => yr(p.r))}" fill="none" stroke="var(--particle)" stroke-width="2"/>
+    <path d="${line(p => yg(p.g))}" fill="none" stroke="var(--trace)" stroke-width="2"/>
+    <line x1="${x(cm)}" x2="${x(cm)}" y1="${T}" y2="${H - B}" stroke="var(--ink)" stroke-width="1.5"/>
+    <circle cx="${x(cm)}" cy="${yr(cur.revenue)}" r="3.5" fill="var(--particle)"/><circle cx="${x(cm)}" cy="${yg(cur.gm)}" r="3.5" fill="var(--trace)"/>
+    <text x="${L - 4}" y="${T + 8}" text-anchor="end" font-size="9" font-family="JetBrains Mono,monospace" fill="var(--particle)">$${rMax.toFixed(0)}M</text>
+    <text x="${L - 4}" y="${H - B}" text-anchor="end" font-size="9" font-family="JetBrains Mono,monospace" fill="var(--particle)">$${rMin.toFixed(0)}M</text>
+    <text x="${W - R + 4}" y="${T + 8}" font-size="9" font-family="JetBrains Mono,monospace" fill="var(--trace)">${gMax.toFixed(0)}%</text>
+    <text x="${W - R + 4}" y="${H - B}" font-size="9" font-family="JetBrains Mono,monospace" fill="var(--trace)">${gMin.toFixed(0)}%</text>
+    <text x="${L}" y="${H - 6}" font-size="9" font-family="JetBrains Mono,monospace" fill="var(--ink-3)">${fmtP(t.price * .3)}</text>
+    <text x="${x(1)}" y="${H - 6}" text-anchor="middle" font-size="9" font-family="JetBrains Mono,monospace" fill="var(--ink-3)">list</text>
+    <text x="${W - R}" y="${H - 6}" text-anchor="end" font-size="9" font-family="JetBrains Mono,monospace" fill="var(--ink-3)">${fmtP(t.price * 2)}</text>`;
+}
+function renderTables() {
+  const i = sel, t = TIERS[i], B = base, C = cur;
+  const rows = [
+    [`${t.name} price / 1M tokens`, t.price, state.price[i], fmtP, 0, d => sgn(d / t.price * 100) + '%'],
+    [`${t.name} tokens / month`, B.tierTokens[i], C.tierTokens[i], v => v.toFixed(0) + 'B', 1, d => sgn(d / B.tierTokens[i] * 100) + '%'],
+    [`${t.name} API revenue`, B.tierRev[i], C.tierRev[i], usd, 1, d => sgn(d) + 'M'],
+    ['Neighboring tiers, tokens', B.tokens - B.tierTokens[i], C.tokens - C.tierTokens[i], v => v.toFixed(0) + 'B', 0, d => sgn(d, 0) + 'B'],
+    ['Total revenue', B.revenue, C.revenue, usd, 1, d => sgn(d) + 'M'],
+    ['Compute cost', B.cost, C.cost, usd, -1, d => sgn(d) + 'M'],
+    ['Gross profit', B.gp, C.gp, usd, 1, d => sgn(d) + 'M'],
+    ['Gross margin', B.gm, C.gm, v => v.toFixed(1) + '%', 1, d => sgn(d) + 'pp'],
+    ['GPU utilization', B.util, C.util, v => v.toFixed(1) + '%', -1, d => sgn(d) + 'pp'],
+    ['Active developers', B.devs, C.devs, v => Math.round(v) + 'k', 1, d => sgn(d / B.devs * 100) + '%'],
+    ['Consumer subscribers', B.subs, C.subs, v => v.toFixed(2) + 'M', 1, d => sgn(d, 2) + 'M'],
+  ];
+  $('trace').innerHTML = `<thead><tr><th>Node</th><th>Before</th><th>After</th><th>Δ</th></tr></thead><tbody>` +
+    rows.map(r => { const d = r[2] - r[1]; return `<tr class="${Math.abs(d) > 1e-9 ? 'on' : ''}"><td>${r[0]}</td><td>${r[3](r[1])}</td><td>${r[3](r[2])}</td><td class="${r[4] ? cls(d, r[4]) : 'flat'}">${Math.abs(d) < 1e-9 ? '–' : r[5](d)}</td></tr>`; }).join('') + '</tbody>';
+  const changed = TIERS.filter((tt, k) => Math.abs(state.price[k] - tt.price) > 1e-9).length + (state.sub !== SUB.price) + (Math.abs(state.disc - .2) > 1e-9);
+  $('chg').textContent = changed ? `${changed} lever${changed > 1 ? 's' : ''} changed` : 'at list prices';
+  const dl = (c, b, f, good) => Math.abs(c - b) < 1e-9 ? '' : `<small class="${cls(c - b, good)}">${f(c - b)}</small>`;
+  $('segTable').innerHTML = `<thead><tr><th>Segment</th><th>Tokens / mo</th><th>Revenue</th><th>Compute</th><th>Margin</th><th>Developers</th></tr></thead><tbody>` +
+    C.segs.map((s, k) => { const b = B.segs[k], gm = (s.revenue - s.cost) / s.revenue * 100, bgm = (b.revenue - b.cost) / b.revenue * 100;
+      return `<tr><td>${s.name}</td><td>${s.total.toFixed(0)}B${dl(s.total, b.total, d => sgn(d, 0) + 'B', 1)}</td><td>${usd(s.revenue)}${dl(s.revenue, b.revenue, d => sgn(d) + 'M', 1)}</td><td>${usd(s.cost)}${dl(s.cost, b.cost, d => sgn(d) + 'M', -1)}</td><td>${gm.toFixed(1)}%${dl(gm, bgm, d => sgn(d) + 'pp', 1)}</td><td>${s.id === 'sub' ? '–' : Math.round(s.devs) + 'k' + dl(s.devs, b.devs, d => sgn(d, 0) + 'k', 1)}</td></tr>`; }).join('') +
+    `<tr class="on"><td><b>Total</b></td><td>${C.tokens.toFixed(0)}B</td><td>${usd(C.revenue)}</td><td>${usd(C.cost)}</td><td>${C.gm.toFixed(1)}%</td><td>${Math.round(C.devs)}k</td></tr></tbody>`;
+}
+
+// ===================== Flow graph（沿用 Offer Trace 的静脉图引擎） =====================
+const canvas = $('flow'), ctx = canvas.getContext('2d');
+let CW = 900, CH = 560, nodes = [], edges = [], particles = [], pulses = [], hover = null;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+let colors = {};
+function readColors() { colors = { ink: css('--ink'), ink2: css('--ink-2'), ink3: css('--ink-3'), panel: css('--panel'), vein: css('--vein'), particle: css('--particle'), trace: css('--trace'), ok: css('--ok'), bad: css('--bad') }; }
+function sizeCanvas() { const r = canvas.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2); CW = r.width; CH = r.height; canvas.width = CW * dpr; canvas.height = CH * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); layout(); }
+function layout() {
+  const X = f => CW * f, top = 92, bot = CH - 40; nodes = []; edges = [];
+  const t = TIERS[sel], b = base, c = cur;
+  const steps = [
+    { label: `${t.name} price`, val: fmtP(state.price[sel]), d: (state.price[sel] / t.price - 1) * 100, f: d => sgn(d) + '%', good: 0 },
+    { label: 'Demand change', val: `${sgn((c.tierTokens[sel] / b.tierTokens[sel] - 1) * 100)}%`, d: 0, f: () => '', good: 0 },
+    { label: `${t.name} tokens`, val: c.tierTokens[sel].toFixed(0) + 'B / mo', d: c.tierTokens[sel] - b.tierTokens[sel], f: d => sgn(d, 0) + 'B', good: 1 },
+    { label: `${t.name} API revenue`, val: usd(c.tierRev[sel]), d: c.tierRev[sel] - b.tierRev[sel], f: d => sgn(d) + 'M', good: 1 },
+  ];
+  steps.forEach((s, i) => nodes.push({ type: 'step', id: 'step' + i, x: X(.06), y: 120 + i * ((CH - 230) / 3), r: 13, n: i + 1, ...s, hot: true }));
+  const maxTok = Math.max(...c.tierTokens);
+  TIERS.forEach((tt, i) => nodes.push({ type: 'tier', id: tt.id, i, label: tt.name, x: X(.29), y: top + 60 + i * (bot - top - 120) / 2, r: 8 + 14 * Math.sqrt(c.tierTokens[i] / maxTok), hot: i === sel,
+    l2: `${fmtP(state.price[i])} · ${c.tierTokens[i].toFixed(0)}B`, d: (c.tierTokens[i] / b.tierTokens[i] - 1) * 100 }));
+  const maxSegRev = Math.max(...c.segs.map(s => s.revenue));
+  c.segs.forEach((s, k) => nodes.push({ type: 'seg', id: s.id, k, label: s.name, x: X(.50), y: top + k * (bot - top) / (c.segs.length - 1), r: 6 + 12 * Math.sqrt(s.revenue / maxSegRev), hot: s.tokens[sel] > 0,
+    l2: `${usd(s.revenue)} · ${s.total.toFixed(0)}B`, d: (s.revenue / b.segs[k].revenue - 1) * 100 }));
+  nodes.push({ type: 'pl', id: 'REV', label: 'Revenue', x: X(.68), y: top + (bot - top) * .3, r: 18, hot: true, l2: usd(c.revenue), d: (c.revenue / b.revenue - 1) * 100 });
+  nodes.push({ type: 'pl', id: 'COST', label: 'Compute cost', x: X(.68), y: top + (bot - top) * .72, r: 6 + 14 * Math.sqrt(c.cost / c.revenue), hot: true, l2: `${usd(c.cost)} · ${c.util.toFixed(0)}% GPU`, d: (c.cost / b.cost - 1) * 100, inv: true });
+  nodes.push({ type: 'gp', id: 'GP', label: 'Gross profit', x: X(.80), y: top + (bot - top) * .5, r: 20, hot: true, l2: `${usd(c.gp)} · ${c.gm.toFixed(1)}%`, d: (c.gp / b.gp - 1) * 100 });
+  cur.gates.forEach((g, i) => nodes.push({ type: 'gate', id: 'g' + g.id, label: g.label, text: g.text, ok: g.ok, x: X(.935), y: (top + bot) / 2 + (i - 1.5) * 96, r: 10, hot: true }));
+  const by = id => nodes.find(n => n.id === id);
+  for (let i = 0; i < 3; i++) edges.push({ a: by('step' + i), b: by('step' + (i + 1)), w: 3, hot: true, chain: i, vertical: true });
+  edges.push({ a: by('step3'), b: by(TIERS[sel].id), w: 3, hot: true, chain: 3 });
+  const tok = c.tokens, w = v => 1 + 26 * Math.sqrt(v / tok);
+  TIERS.forEach((tt, i) => c.segs.forEach(s => { if (s.tokens[i] > 1) edges.push({ a: by(tt.id), b: by(s.id), w: w(s.tokens[i]) * .9, hot: i === sel, chain: 4 }); }));
+  const rw = v => 1 + 22 * Math.sqrt(v / c.revenue);
+  c.segs.forEach(s => { edges.push({ a: by(s.id), b: by('REV'), w: rw(s.revenue), hot: s.tokens[sel] > 0, chain: 5 }); edges.push({ a: by(s.id), b: by('COST'), w: rw(s.cost), hot: s.tokens[sel] > 0, chain: 5, cost: true }); });
+  edges.push({ a: by('REV'), b: by('GP'), w: rw(c.revenue) * .8, hot: true, chain: 6 });
+  edges.push({ a: by('COST'), b: by('GP'), w: rw(c.cost) * .8, hot: true, chain: 6, cost: true });
+  cur.gates.forEach(g => edges.push({ a: by('GP'), b: by('g' + g.id), w: 1.5, hot: true, chain: 7, gate: true, ok: g.ok }));
+  particles = [];
+  edges.forEach((e, ei) => { const n = Math.max(2, Math.round(e.w * 1.4)); for (let k = 0; k < n; k++) particles.push({ e: ei, t: Math.random(), v: (0.002 + Math.random() * 0.003) * (e.hot ? 1.5 : 1), o: (Math.random() - .5) * e.w * .7 }); });
+}
+function bez(e, t) {
+  const { a, b } = e, mx = (a.x + b.x) / 2, v = e.vertical;
+  const p1 = v ? [a.x, (a.y + b.y) / 2] : [mx, a.y], p2 = v ? [b.x, (a.y + b.y) / 2] : [mx, b.y], u = 1 - t;
+  return [u * u * u * a.x + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * b.x, u * u * u * a.y + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * b.y];
+}
+function firePulse() { if (reduceMotion) return; edges.forEach((e, ei) => { if (e.hot && !e.gate || e.gate) for (let j = 0; j < 3; j++) pulses.push({ e: ei, t: -(e.chain * .5) - j * .07, v: .022 }); }); }
+function drawEdge(e) {
+  ctx.beginPath(); for (let i = 0; i <= 40; i++) { const [x, y] = bez(e, i / 40); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+  ctx.lineCap = 'round';
+  if (e.gate) { ctx.setLineDash([4, 5]); ctx.strokeStyle = e.ok ? colors.ok : colors.bad; ctx.globalAlpha = .8; ctx.lineWidth = 1.5; ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; return; }
+  ctx.strokeStyle = e.hot ? colors.trace : colors.vein; ctx.globalAlpha = e.hot ? (e.cost ? .28 : .42) : .35; ctx.lineWidth = e.w; ctx.stroke(); ctx.globalAlpha = 1;
+}
+function txt(s, x, y, o = {}) { ctx.font = `${o.w || 400} ${o.size || 11}px ${o.mono ? '"JetBrains Mono",monospace' : '"Source Sans 3",sans-serif'}`; ctx.fillStyle = o.color || colors.ink2; ctx.textAlign = o.align || 'left'; ctx.textBaseline = 'middle'; ctx.fillText(s, x, y); }
+function drawNode(n) {
+  if (n.type === 'gate') {
+    ctx.save(); ctx.translate(n.x, n.y); ctx.rotate(Math.PI / 4); ctx.fillStyle = n.ok ? colors.ok : colors.bad; ctx.fillRect(-n.r, -n.r, n.r * 2, n.r * 2); ctx.restore();
+    txt(n.label, n.x, n.y - 24, { align: 'center', w: 600, size: 11.5, color: colors.ink }); txt(n.text, n.x, n.y + 24, { align: 'center', mono: true, size: 10, color: n.ok ? colors.ok : colors.bad }); return;
+  }
+  const flash = pulses.some(p => p.t > .85 && p.t < 1.15 && edges[p.e].b === n);
+  if (n.hot && n.type !== 'step') { ctx.beginPath(); ctx.arc(n.x, n.y, n.r + (flash ? 10 : 5), 0, Math.PI * 2); ctx.fillStyle = colors.trace; ctx.globalAlpha = flash ? .35 : .12; ctx.fill(); ctx.globalAlpha = 1; }
+  ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+  if (n.type === 'step') { ctx.fillStyle = colors.panel; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = colors.trace; ctx.stroke(); txt(String(n.n), n.x, n.y + .5, { align: 'center', mono: true, size: 11, w: 500, color: colors.trace });
+    txt(n.label, n.x + 20, n.y - 8, { w: 600, size: 12, color: colors.ink }); txt(n.val, n.x + 20, n.y + 8, { mono: true, size: 11, color: colors.ink2 });
+    if (n.good && Math.abs(n.d) > 1e-9) txt(n.f(n.d), n.x + 20, n.y + 22, { mono: true, size: 10, color: n.d > 0 ? colors.ok : colors.bad }); return; }
+  ctx.fillStyle = n.type === 'tier' && n.i === sel ? colors.trace : (n.id === 'COST' ? colors.vein : colors.particle); ctx.globalAlpha = n.hot ? 1 : .6; ctx.fill(); ctx.globalAlpha = 1;
+  if (hover === n) { ctx.lineWidth = 2; ctx.strokeStyle = colors.ink; ctx.stroke(); }
+  const left = n.type === 'tier', lx = left ? n.x - n.r - 9 : n.x, al = left ? 'right' : 'center', ly = left ? n.y - 7 : n.y - n.r - 20;
+  txt(n.label, lx, ly, { align: al, w: 600, size: 12, color: n.type === 'tier' && n.i === sel ? colors.trace : colors.ink });
+  txt(n.l2, lx, left ? n.y + 7 : n.y + n.r + 12, { align: al, mono: true, size: 9.5, color: colors.ink3 });
+  if (Math.abs(n.d) > .05) { const good = n.inv ? n.d < 0 : n.d > 0; txt(sgn(n.d) + '%', left ? lx : n.x + n.r + 7, left ? n.y + 20 : n.y, { align: left ? 'right' : 'left', mono: true, size: 9.5, color: good ? colors.ok : colors.bad }); }
+}
+function frame() {
+  ctx.clearRect(0, 0, CW, CH);
+  [['Your change', .06], ['MODEL TIER', .29], ['CUSTOMERS', .50], ['P&L', .68], ['MARGIN', .80], ['GUARDRAILS', .935]].forEach(([s, f]) => txt(s, CW * f, 24, { align: 'center', mono: true, size: 10, color: colors.ink3 }));
+  edges.filter(e => !e.hot).forEach(drawEdge); edges.filter(e => e.hot).forEach(drawEdge);
+  particles.forEach(p => { const e = edges[p.e]; if (!reduceMotion) { p.t += p.v; if (p.t > 1) p.t -= 1; }
+    const [x, y] = bez(e, p.t); ctx.beginPath(); ctx.arc(x, y + (e.vertical ? 0 : p.o), e.hot ? 1.8 : 1.4, 0, Math.PI * 2);
+    ctx.fillStyle = e.gate ? (e.ok ? colors.ok : colors.bad) : (e.hot ? colors.trace : colors.particle); ctx.globalAlpha = e.hot ? .9 : .55; ctx.fill(); ctx.globalAlpha = 1; });
+  pulses.forEach(p => { p.t += p.v; if (p.t < 0 || p.t > 1) return; const [x, y] = bez(edges[p.e], p.t); ctx.beginPath(); ctx.arc(x, y, 3.6, 0, Math.PI * 2); ctx.fillStyle = colors.trace; ctx.shadowColor = colors.trace; ctx.shadowBlur = 14; ctx.fill(); ctx.shadowBlur = 0; });
+  pulses = pulses.filter(p => p.t < 1.3);
+  nodes.forEach(drawNode);
+  if (!reduceMotion) requestAnimationFrame(frame);
+}
+function hit(ev) { const r = canvas.getBoundingClientRect(), x = ev.clientX - r.left, y = ev.clientY - r.top; let best = null, bd = 1e9; nodes.forEach(n => { const d = Math.hypot(n.x - x, n.y - y); if (d < n.r + 10 && d < bd) { best = n; bd = d; } }); return { n: best, x, y }; }
+canvas.addEventListener('mousemove', ev => {
+  const { n, x, y } = hit(ev); hover = n; const tip = $('tip'); canvas.style.cursor = n && n.type === 'tier' ? 'pointer' : 'crosshair';
+  if (!n || n.type === 'step') { tip.hidden = true; if (reduceMotion) frame(); return; }
+  let h;
+  if (n.type === 'gate') h = `<b>${n.label}</b><br>${n.text}<br>${n.ok ? 'passing' : 'failing'}`;
+  else if (n.type === 'tier') { const i = n.i; h = `<b>${TIERS[i].name}</b><br>price ${fmtP(state.price[i])} (list ${fmtP(TIERS[i].price)})<br>tokens ${cur.tierTokens[i].toFixed(0)}B / mo<br>compute cost ${fmtP(TIERS[i].cost)} / 1M<br>click to select`; }
+  else if (n.type === 'seg') { const s = cur.segs[n.k]; h = `<b>${s.name}</b><br>revenue ${usd(s.revenue)} · compute ${usd(s.cost)}<br>tokens ${s.total.toFixed(0)}B / mo${s.id === 'sub' ? `<br>${s.subs.toFixed(2)}M subscribers` : `<br>${Math.round(s.devs)}k active developers`}`; }
+  else h = `<b>${n.label}</b><br>${n.l2}`;
+  tip.innerHTML = h; tip.hidden = false; const box = $('flowbox'); tip.style.left = Math.min(x + 14, box.scrollWidth - tip.offsetWidth - 6) + 'px'; tip.style.top = (y + 14) + 'px';
+  if (reduceMotion) frame();
+});
+canvas.addEventListener('mouseleave', () => { hover = null; $('tip').hidden = true; if (reduceMotion) frame(); });
+canvas.addEventListener('click', ev => { const { n } = hit(ev); if (n && n.type === 'tier') { sel = n.i; renderAll(true); } });
+
+// ===================== Interaction =====================
+function renderAll(pulse) { recompute(); renderKpis(); renderControls(); renderCurve(); renderTables(); layout(); if (pulse) firePulse(); if (reduceMotion) frame(); }
+$('tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; sel = +b.dataset.i; renderAll(true); });
+$('price').addEventListener('input', e => { state.price[sel] = TIERS[sel].price * (+e.target.value) / 100; renderAll(true); });
+$('sub').addEventListener('input', e => { state.sub = +e.target.value; renderAll(true); });
+$('disc').addEventListener('input', e => { state.disc = +e.target.value / 100; renderAll(true); });
+$('elastic').addEventListener('change', e => { state.elastic = +e.target.value; renderAll(true); });
+$('reset').addEventListener('click', () => { state = baseState(state.elastic); $('msg').textContent = 'Back at list prices.'; renderAll(true); });
+const SCEN = [
+  ['Frontier price war (−25%)', s => { s.price[2] = TIERS[2].price * .75; }, 2],
+  ['Raise Mid for coding agents (+33%)', s => { s.price[1] = TIERS[1].price * 1.33; }, 1],
+  ['Halve Small to grow developers', s => { s.price[0] = TIERS[0].price * .5; }, 0],
+  ['Deeper enterprise discount (35%)', s => { s.disc = .35; }, null],
+];
+$('scenarios').innerHTML = SCEN.map((s, i) => `<button class="btn" data-s="${i}">${s[0]}</button>`).join('');
+$('scenarios').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; const [name, fn, tier] = SCEN[+b.dataset.s];
+  state = baseState(state.elastic); fn(state); if (tier != null) sel = tier; renderAll(true);
+  const fails = cur.gates.filter(g => !g.ok).map(g => g.label); $('msg').textContent = `${name}: ${fails.length ? 'breaks ' + fails.join(' and ') + '.' : 'passes every guardrail.'}`; });
+$('solve').addEventListener('click', () => {
+  let best = null;
+  for (let m = .3; m <= 2.0001; m += .01) { const s = { ...state, price: state.price.slice() }; s.price[sel] = TIERS[sel].price * m; const e = evaluate(s); const g = gatesOf(e, base);
+    if (g.every(x => x.ok) && (!best || e.gp > best.gp)) best = { m, gp: e.gp, price: s.price[sel] }; }
+  if (!best) { $('msg').textContent = `No ${TIERS[sel].name} price passes every guardrail with the other levers where they are. Try resetting them.`; return; }
+  state.price[sel] = best.price; renderAll(true);
+  $('msg').textContent = `Best ${TIERS[sel].name} price: ${fmtP(best.price)} (${sgn((best.m - 1) * 100, 0)}% vs list), gross profit ${usd(best.gp)} per month, every guardrail passing.`;
+});
+
+readColors();
+new ResizeObserver(() => { sizeCanvas(); if (reduceMotion) frame(); }).observe(canvas);
+renderAll();
+sizeCanvas();
+requestAnimationFrame(frame);
+setTimeout(firePulse, 500);
+</script>
+</body>
+</html>

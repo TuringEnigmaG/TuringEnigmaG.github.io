@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="BIG G mark">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5EC8E5"/>
+      <stop offset=".55" stop-color="#46D19A"/>
+      <stop offset="1" stop-color="#FFB347"/>
+    </linearGradient>
+    <radialGradient id="glow"><stop offset="0" stop-color="#FFB347" stop-opacity=".9"/><stop offset="1" stop-color="#FFB347" stop-opacity="0"/></radialGradient>
+  </defs>
+  <!-- G 的外弧：从右上开口，逆时针绕到右侧中线 -->
+  <path d="M89.7 30.3 A42 42 0 1 0 102 60" fill="none" stroke="url(#g)" stroke-width="15" stroke-linecap="round"/>
+  <!-- 横杠向内升起成一座山峰 -->
+  <path d="M102 62 H74 L60 40 L48 58" fill="none" stroke="url(#g)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 雪顶 -->
+  <path d="M60 40 L54.6 48.6 L58.2 47 L60.6 49.4 L63.6 46.4 L66 49.6 Z" fill="#EEF2F4"/>
+  <!-- 峰顶节点 -->
+  <circle cx="60" cy="33" r="11" fill="url(#glow)"/>
+  <circle cx="60" cy="33" r="4.2" fill="#FFB347"/>
+</svg>

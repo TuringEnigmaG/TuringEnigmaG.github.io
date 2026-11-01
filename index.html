@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gloria (Ruogu) Liu · Data Scientist</title>
+<meta name="description" content="Gloria Liu, data scientist in pricing, revenue and growth analytics who builds with AI. Interactive models, case studies, music and more.">
+<link rel="icon" href="brand/biggmark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: full-bleed hero with a live capability map, then work, music, outside work, contact. Dark by design */
+:root{
+  color-scheme:dark;
+  --bg:#07090C; --panel:#0F1418; --panel-2:#151C21; --ink:#EEF2F4; --ink-2:#A8B3BB; --ink-3:#66727C; --line:#1E262C;
+  --cyan:#5EC8E5; --amber:#FFB347; --green:#46D19A; --violet:#B39DFF;
+  --display:"Bricolage Grotesque",system-ui,sans-serif; --body:"Source Sans 3",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 var(--body);-webkit-font-smoothing:antialiased}
+a{color:var(--cyan)}
+.hero{position:relative;min-height:640px;overflow:hidden;border-bottom:1px solid var(--line)}
+#map{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(7,9,12,.82) 0%,rgba(7,9,12,.45) 38%,rgba(7,9,12,0) 60%),linear-gradient(0deg,rgba(7,9,12,.9),rgba(7,9,12,0) 22%)}
+.hero-inner{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:72px max(18px,env(safe-area-inset-left)) 56px max(18px,env(safe-area-inset-right));pointer-events:none}
+.hero-text{max-width:500px;pointer-events:auto}
+.brandmark{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font:800 20px var(--display);letter-spacing:-.01em;margin-bottom:34px}
+.brandmark b{background:linear-gradient(90deg,var(--cyan),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+.kicker{font:500 12px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--amber);margin:0 0 16px}
+h1{font:800 clamp(56px,9vw,112px)/.88 var(--display);letter-spacing:-.035em;margin:0 0 22px}
+.aka{font:500 15px var(--mono);letter-spacing:.06em;color:var(--ink-2);margin:-10px 0 22px}
+h1 span{display:block;background:linear-gradient(90deg,var(--cyan),var(--green) 60%,var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{font-size:20px;line-height:1.5;color:var(--ink-2);margin:0 0 26px}
+.lede b{color:var(--ink);font-weight:600}
+.cta{display:flex;flex-wrap:wrap;gap:10px}
+.cta a{font:600 14px var(--body);text-decoration:none;border-radius:999px;padding:10px 18px;border:1px solid var(--line);color:var(--ink);background:rgba(15,20,24,.7);backdrop-filter:blur(6px)}
+.cta a.primary{background:var(--amber);color:#1A1306;border-color:var(--amber)}
+.cta a:hover{border-color:var(--cyan)}
+.cta a:focus-visible,a:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+.maphint{position:absolute;right:max(18px,env(safe-area-inset-right));bottom:16px;z-index:2;font:12px var(--mono);color:var(--ink-3)}
+.tip{position:absolute;z-index:3;pointer-events:none;max-width:280px;background:rgba(15,20,24,.95);border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:13.5px;line-height:1.45;color:var(--ink-2)}
+.tip b{color:var(--ink);display:block;font:600 14px var(--body);margin-bottom:2px}
+@media (max-width:860px){.hero{min-height:auto}#map{position:relative;height:420px}.hero-inner{padding-bottom:10px}.maphint{bottom:8px}}
+.stats{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line)}
+.stats div{padding:20px max(18px,env(safe-area-inset-left));border-right:1px solid var(--line)}
+.stats div:last-child{border-right:0}
+.stats b{display:block;font:800 34px/1 var(--display);background:linear-gradient(90deg,var(--cyan),var(--green));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stats span{font-size:13.5px;color:var(--ink-3)}
+@media (max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}.stats div:nth-child(2){border-right:0}.stats div{border-bottom:1px solid var(--line)}}
+.wrap{max-width:1000px;margin:0 auto;padding:12px max(18px,env(safe-area-inset-left)) 80px max(18px,env(safe-area-inset-right))}
+h2{font:500 12px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);margin:64px 0 16px;display:flex;align-items:center;gap:12px}
+h2::after{content:"";flex:1;height:1px;background:var(--line)}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.cards{grid-template-columns:1fr}}
+a.card{position:relative;display:flex;flex-direction:column;gap:8px;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;overflow:hidden;transition:border-color .2s,transform .2s}
+a.card::before{content:"";position:absolute;inset:-1px;border-radius:14px;padding:1px;background:linear-gradient(135deg,var(--cyan),transparent 40%,transparent 60%,var(--amber));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .2s}
+a.card:hover{transform:translateY(-2px)} a.card:hover::before{opacity:1}
+.badge{font:500 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--amber)}
+.card h3{font:800 30px/1.05 var(--display);letter-spacing:-.015em;margin:0}
+.card p{margin:0;color:var(--ink-2);font-size:15.5px}
+.nums{display:flex;flex-wrap:wrap;gap:6px 18px;font:13px var(--mono);color:var(--ink-3);margin-top:auto;padding-top:8px}
+.nums b{color:var(--green);font-weight:500}
+.tags{font:12px var(--mono);color:var(--ink-3)}
+.go{font:600 14px var(--body);color:var(--cyan)}
+.kit{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media (max-width:900px){.kit{grid-template-columns:1fr 1fr}} @media (max-width:520px){.kit{grid-template-columns:1fr}}
+.kit div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.kit b{font:600 17px/1.2 var(--display)}
+.kit p{margin:0;font-size:14px;color:var(--ink-2);flex:1}
+.kit span{font:11.5px var(--mono);color:var(--green)}
+.music{display:grid;grid-template-columns:1.4fr 1fr;gap:22px;align-items:start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+@media (max-width:760px){.music{grid-template-columns:1fr}}
+video{width:100%;max-width:100%;border-radius:10px;display:block;background:#000;aspect-ratio:16/9}
+.music h3{font:800 28px/1.1 var(--display);margin:4px 0 8px}
+.music h3 small{font:400 14px var(--body);color:var(--ink-3);margin-left:6px}
+.music p{color:var(--ink-2);font-size:15.5px;margin:0 0 12px}
+.life{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+@media (max-width:1000px){.life{grid-template-columns:1fr 1fr}} @media (max-width:520px){.life{grid-template-columns:1fr}}
+.life div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.life i{display:block;width:26px;height:3px;border-radius:2px;margin-bottom:12px}
+.life h3{font:600 19px/1.2 var(--display);margin:0 0 6px}
+.life p{font-size:14.5px;color:var(--ink-2);margin:0}
+.contact{margin-top:72px;background:linear-gradient(135deg,rgba(94,200,229,.12),rgba(255,179,71,.08));border:1px solid var(--line);border-radius:16px;padding:32px 26px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:18px}
+.contact h3{font:800 34px/1.05 var(--display);margin:0;letter-spacing:-.02em}
+.contact p{margin:6px 0 0;color:var(--ink-2);max-width:52ch}
+footer{margin-top:30px;font:12px var(--mono);color:var(--ink-3)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<section class="hero" aria-label="Introduction">
+  <canvas id="map" aria-label="Capability map: Gloria at the center, skills in the inner ring, work in the outer ring. Hover a node to see connections; click a public project to open it."></canvas>
+  <div class="tip" id="tip" hidden></div>
+  <div class="hero-inner">
+    <div class="hero-text">
+      <a class="brandmark" href="brand/" aria-label="BIG G brand"><img src="brand/biggmark.svg" alt="" width="44" height="44"><span>BIG <b>G</b></span></a>
+      <p class="kicker">Data scientist · pricing, revenue & growth</p>
+      <h1>Gloria<span>Liu</span></h1>
+      <p class="aka">also Ruogu · 刘若谷</p>
+      <p class="lede">I turn messy business questions into <b>AI-built tools</b> that people actually use: pricing engines, what-if models, agents and trading systems. Seven years across auto finance, vehicle data and banking.</p>
+      <div class="cta">
+        <a class="primary" href="token-trace/">Play with Token Trace</a>
+        <a href="https://www.linkedin.com/in/ruogu-liu" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="mailto:r233liu@uwaterloo.ca">Email me</a>
+      </div>
+    </div>
+  </div>
+  <div class="maphint">hover the map · click a project</div>
+</section>
+
+<div class="stats" aria-label="At a glance">
+  <div><b>7 yrs</b><span>data science in finance, vehicles & banking</span></div>
+  <div><b>3</b><span>countries lived and worked in</span></div>
+  <div><b>2</b><span>live interactive demos below</span></div>
+  <div><b>100%</b><span>of this site built with Claude Code</span></div>
+</div>
+
+<div class="wrap">
+  <h2>Looking for</h2>
+  <p style="color:var(--ink-2);max-width:70ch;margin:0">Data science roles at <b style="color:var(--ink)">AI companies in the Bay Area</b>, in pricing, revenue, growth or finance analytics. Most recently I worked forward-deployed with the pricing and strategy team at Mercedes-Benz Financial Services: I interviewed the people who set prices, rebuilt their pricing chain in code, and built tools so pricing, sales and finance work from the same numbers. Based in Redwood City. Canadian citizen, TN-eligible.</p>
+
+  <h2 id="work">AI work</h2>
+  <div class="cards">
+    <a class="card" href="token-trace/">
+      <span class="badge">Interactive model</span>
+      <h3>Token Trace</h3>
+      <p>Set a price per million tokens and watch it flow through demand, customer segments, revenue, GPU cost and gross margin into four guardrails. A what-if tool for usage-based AI pricing.</p>
+      <div class="nums"><span><b>3</b> tiers</span><span><b>5</b> segments</span><span><b>4</b> guardrails</span><span>best-price solver</span></div>
+      <span class="tags">pricing · elasticity · unit economics · data viz</span>
+      <span class="go">Open the model →</span>
+    </a>
+    <a class="card" href="quant/">
+      <span class="badge">Case study</span>
+      <h3>Momentum, tested honestly</h3>
+      <p>A research-to-paper-trading system for China A-shares and US equities. Most ideas failed walk-forward validation and were dropped; one survived and now trades on paper every day, run by scheduled cloud agents.</p>
+      <div class="nums"><span>OOS Sharpe <b>0.84</b> vs 0.47</span><span><b>6</b> ideas dropped</span><span><b>6</b> incidents fixed</span></div>
+      <span class="tags">Python · backtesting · walk-forward · cloud agents</span>
+      <span class="go">Read the case study →</span>
+    </a>
+  </div>
+
+  <h2>Data science toolkit</h2>
+  <div class="kit">
+    <div><b>Causal inference & elasticity</b><p>Variant-level price elasticity over 44 months, separating a policy change from true price response.</p><span>pricing · econometrics</span></div>
+    <div><b>Optimization</b><p>Subsidy allocation under budget and profitability guardrails; the solver matched the expert plan in 23 of 27 cells.</p><span>constrained solvers</span></div>
+    <div><b>Forecasting</b><p>A loan-term mix model that cut out-of-sample error from 6.2% to 5.0%; ARIMA demand forecasts 12% more accurate.</p><span>time series</span></div>
+    <div><b>Machine learning & explainability</b><p>LightGBM models with per-model SHAP reports that guided the design of a sales audience-selection agent.</p><span>LightGBM · XGBoost · SHAP</span></div>
+    <div><b>Survival analysis</b><p>100+ VIN-level Cox and Weibull models predicting vehicle reliability across 2.6B records.</p><span>time-to-event</span></div>
+    <div><b>NLP</b><p>A BERT pipeline classifying 80,000+ recall entries a day, with sentence-embedding clustering and active learning.</p><span>BERT · SBERT</span></div>
+    <div><b>Validation discipline</b><p>Every idea faces an out-of-sample test; six trading strategies were dropped because they failed it.</p><span>walk-forward · backtesting</span></div>
+    <div><b>Data at scale</b><p>Spark SQL rules over an 11M-question bank; PySpark feature pipelines; Prefect and MLflow in production.</p><span>SQL · Spark · MLOps</span></div>
+  </div>
+
+  <h2 id="music">Music</h2>
+  <div class="music">
+    <video controls preload="none" poster="music/poster.jpg" playsinline><source src="music/kegarenai-te.mp4" type="video/mp4"></video>
+    <div>
+      <h3>汚れない手<small>Hands that stay clean</small></h3>
+      <p>An AI music video I made end to end: I composed and produced the song with AI music tools, then built the visuals scene by scene with generative video, keeping the same character consistent from shot to shot.</p>
+      <p>Making music taught me how to direct generative models: what to specify, what to leave open, and when to start over.</p>
+    </div>
+  </div>
+
+  <h2>Outside work</h2>
+  <div class="life">
+    <div><i style="background:var(--amber)"></i><h3>Werewolf</h3><p>Reading people, weighing incomplete evidence and committing to a call before everyone agrees. Good practice for the day job.</p></div>
+    <div><i style="background:var(--green)"></i><h3>Writing on Chinese medicine</h3><p>I'm writing <i>解码中医</i> (Decoding TCM), a bilingual book that explains Traditional Chinese Medicine through modern medical evidence.</p></div>
+    <div><i style="background:var(--violet)"></i><h3>Music</h3><p>Composing, sound design and audio post-production, from AI soundtracks to full music videos.</p></div>
+    <div><i style="background:var(--ink-2)"></i><h3>Detective novels</h3><p>Following the clues, ruling out suspects, distrusting the obvious answer. The same instinct I bring to a model that looks too good.</p></div>
+    <div><i style="background:var(--cyan)"></i><h3>Seeing the world</h3><p>Lived and worked in Canada, China and the US. New places keep my assumptions honest.</p></div>
+  </div>
+
+  <div class="contact">
+    <div><h3>Let's talk.</h3><p>Open to data science roles at AI companies. The fastest way to reach me is LinkedIn or email.</p></div>
+    <div class="cta"><a class="primary" href="https://www.linkedin.com/in/ruogu-liu" target="_blank" rel="noopener">LinkedIn</a><a href="mailto:r233liu@uwaterloo.ca">r233liu@uwaterloo.ca</a></div>
+  </div>
+  <footer>© 2026 Gloria (Ruogu) Liu · <a href="brand/" style="color:inherit">BIG G</a> · built with Claude Code</footer>
+</div>
+
+<script>
+// 首页能力地图：中心是我，内圈技能，外圈作品，粒子沿连线流动；悬停高亮关联，点击公开作品跳转
+const canvas = document.getElementById('map'), ctx = canvas.getContext('2d'), tip = document.getElementById('tip');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const C = { cyan: '#5EC8E5', amber: '#FFB347', green: '#46D19A', violet: '#B39DFF', ink: '#EEF2F4', ink2: '#A8B3BB', ink3: '#66727C' };
+const SKILLS = [
+  { id: 'pricing', label: 'Pricing & elasticity', color: C.amber, d: 'Price elasticity, subsidy allocation, RoRAC and penetration trade-offs.' },
+  { id: 'causal', label: 'Causal inference', color: C.amber, d: 'Separating policy effects from true elasticity; out-of-sample validation.' },
+  { id: 'opt', label: 'Optimization', color: C.amber, d: 'Constrained solvers that respect budgets and guardrails.' },
+  { id: 'agents', label: 'LLM agents', color: C.cyan, d: 'Conversational agents for audience selection and process coaching.' },
+  { id: 'code', label: 'AI coding agents', color: C.cyan, d: 'Claude Code every day: from idea to working tool in days, not weeks.' },
+  { id: 'viz', label: 'Interactive data viz', color: C.green, d: 'Flow graphs and what-if tools people can explore themselves.' },
+  { id: 'ml', label: 'Machine learning', color: C.green, d: 'LightGBM, XGBoost and SHAP: models that business teams can question and trust.' },
+  { id: 'ts', label: 'Forecasting', color: C.green, d: 'Time series and term-mix models; out-of-sample error is the score that counts.' },
+  { id: 'surv', label: 'Survival analysis', color: C.green, d: 'Cox and Weibull models for time-to-failure across billions of vehicle records.' },
+  { id: 'nlp', label: 'NLP', color: C.cyan, d: 'BERT and sentence embeddings for classifying messy text at scale.' },
+  { id: 'gen', label: 'Generative media', color: C.violet, d: 'AI music and video, directed shot by shot.' },
+];
+const WORKS = [
+  { id: 'tt', label: 'Token Trace', href: 'token-trace/', uses: ['pricing', 'opt', 'viz', 'code'], d: 'Interactive model of usage-based AI pricing. Click to open.' },
+  { id: 'quant', label: 'Momentum, tested honestly', href: 'quant/', uses: ['causal', 'opt', 'ts', 'code'], d: 'Quant research and daily paper trading with cloud agents. Click to open.' },
+  { id: 'offer', label: 'Offer Trace (Mercedes-Benz)', uses: ['pricing', 'ts', 'viz', 'code'], d: 'What-if pricing tool built at work. Confidential; a synthetic-data demo is available on request.' },
+  { id: 'aud', label: 'Audience-selection agent', uses: ['agents', 'causal', 'ml'], d: 'Sales copilot agent guided by LightGBM + SHAP significance reports. Built at work; confidential.' },
+  { id: 'onto', label: 'Ontology lighthouse', uses: ['pricing', 'agents', 'viz'], d: 'Pricing objects modeled as a reusable semantic layer. Built at work.' },
+  { id: 'carfax', label: 'Vehicle reliability models (Carfax)', uses: ['surv', 'ml', 'ts'], d: '100+ VIN-level survival models over 2.6B vehicle records, served to the Vehicle History Report.' },
+  { id: 'recall', label: 'Recall NLP pipeline (Carfax)', uses: ['nlp', 'ml'], d: 'BERT pipeline classifying 80,000+ recall entries a day into safety categories, with active learning.' },
+  { id: 'mv', label: '汚れない手 · music video', href: '#music', uses: ['gen', 'code'], d: 'AI music video made end to end. Click to watch.' },
+  { id: 'book', label: '解码中医 · book', uses: ['causal'], d: 'Bilingual book explaining Traditional Chinese Medicine through modern medical evidence.' },
+];
+let bgLayers = [], flakes = [];
+let W = 0, H = 0, nodes = [], edges = [], parts = [], hover = null, mouse = { x: -1e4, y: -1e4 }, t0 = performance.now();
+function layout() {
+  const r = canvas.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
+  W = r.width; H = r.height; canvas.width = W * dpr; canvas.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  paintMountains(dpr);
+  flakes = Array.from({ length: Math.round(W / 14) }, () => ({ x: Math.random() * W, y: Math.random() * H, r: .6 + Math.random() * 1.6, v: .25 + Math.random() * .7, a: .25 + Math.random() * .55, p: Math.random() * 6 }));
+  const narrow = W < 860, cx = narrow ? W / 2 : W * .68, cy = H / 2, R = Math.min(narrow ? W * .46 : W * .31, H * .46);
+  nodes = [{ id: 'me', type: 'me', label: 'Gloria', x: cx, y: cy, r: 16, color: C.ink }];
+  SKILLS.forEach((s, i) => { const a = -Math.PI / 2 + i / SKILLS.length * Math.PI * 2; nodes.push({ ...s, type: 'skill', x: cx + Math.cos(a) * R * .55, y: cy + Math.sin(a) * R * .5, r: 6 }); });
+  WORKS.forEach((w, i) => { const a = -Math.PI / 2 + (i + .5) / WORKS.length * Math.PI * 2; nodes.push({ ...w, type: 'work', color: w.href ? C.ink : C.ink3, x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R * .92, r: w.href ? 9 : 7 }); });
+  const by = id => nodes.find(n => n.id === id);
+  edges = [];
+  SKILLS.forEach(s => edges.push({ a: by('me'), b: by(s.id), color: s.color }));
+  WORKS.forEach(w => w.uses.forEach(u => edges.push({ a: by(u), b: by(w.id), color: by(u).color })));
+  parts = [];
+  edges.forEach((e, i) => { for (let k = 0; k < 4; k++) parts.push({ e: i, t: Math.random(), v: .0025 + Math.random() * .003 }); });
+}
+// 雪山：天空一层 + 四层山脊，离屏画好，每帧只做平移
+function noise1(x, seed) { const s = Math.sin(x * 12.9898 + seed * 78.233) * 43758.5453; return s - Math.floor(s); }
+function smoothNoise(x, seed) { const i = Math.floor(x), f = x - i, u = f * f * (3 - 2 * f); return noise1(i, seed) * (1 - u) + noise1(i + 1, seed) * u; }
+function ridgeY(x, base, amp, seed) { let y = 0, a = 1, fr = 1, tot = 0; for (let o = 0; o < 6; o++) { const n = 1 - Math.abs(smoothNoise(x * fr, seed + o) * 2 - 1); y += n * n * a; tot += a; a *= .48; fr *= 2.05; } return base - (y / tot) * amp * 2.1; }
+function paintMountains(dpr) {
+  const mk = () => { const c = document.createElement('canvas'); c.width = (W + 40) * dpr; c.height = H * dpr; const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); return [c, g]; };
+  const Wx = W + 40; bgLayers = [];
+  // 天空、星星、月光
+  let [c, g] = mk(); const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, '#05070D'); sky.addColorStop(.55, '#0C1A2B'); sky.addColorStop(1, '#16324A'); g.fillStyle = sky; g.fillRect(0, 0, Wx, H);
+  for (let i = 0; i < W / 3; i++) { const x = noise1(i, 3) * Wx, y = noise1(i, 7) * H * .6, a = .2 + noise1(i, 11) * .7; g.fillStyle = `rgba(255,255,255,${a})`; g.fillRect(x, y, noise1(i, 13) > .92 ? 1.8 : 1, noise1(i, 13) > .92 ? 1.8 : 1); }
+  const moon = g.createRadialGradient(Wx * .82, H * .2, 0, Wx * .82, H * .2, H * .45); moon.addColorStop(0, 'rgba(200,225,255,.22)'); moon.addColorStop(1, 'rgba(200,225,255,0)'); g.fillStyle = moon; g.fillRect(0, 0, Wx, H);
+  g.beginPath(); g.arc(Wx * .82, H * .2, 14, 0, Math.PI * 2); g.fillStyle = 'rgba(235,242,255,.9)'; g.fill();
+  bgLayers.push(c);
+  // 四层山脊：远处亮、雪多，近处暗
+  const layers = [
+    { base: .66, amp: .3, seed: 1, rock: '#1E3349', snow: '#7E95AD', snowline: .35, scale: 2.2 },
+    { base: .76, amp: .24, seed: 5, rock: '#152637', snow: '#5F7690', snowline: .28, scale: 2.8 },
+    { base: .84, amp: .16, seed: 9, rock: '#0E1926', snow: '#40566C', snowline: .2, scale: 3.4 },
+    { base: .97, amp: .1, seed: 13, rock: '#080E15', snow: '#26384A', snowline: .1, scale: 4.2 },
+  ];
+  layers.forEach(L => {
+    [c, g] = mk(); const ys = [];
+    for (let x = 0; x <= Wx; x += 3) ys.push(ridgeY(x / Wx * L.scale, H * L.base, H * L.amp, L.seed));
+    const top = Math.min(...ys), bot = H;
+    g.beginPath(); g.moveTo(0, H); ys.forEach((y, i) => g.lineTo(i * 3, y)); g.lineTo(Wx, H); g.closePath();
+    const grad = g.createLinearGradient(0, top, 0, top + (bot - top) * L.snowline + 40);
+    grad.addColorStop(0, L.snow); grad.addColorStop(Math.min(.98, L.snowline + .02), L.snow); grad.addColorStop(1, L.rock);
+    g.fillStyle = grad; g.fill();
+    // 雪线上方加一层月光边缘高光
+    g.beginPath(); ys.forEach((y, i) => i ? g.lineTo(i * 3, y) : g.moveTo(0, y)); g.strokeStyle = 'rgba(230,240,255,.18)'; g.lineWidth = 1; g.stroke();
+    bgLayers.push(c);
+  });
+}
+function ctrl(e) { // 弯曲连线的控制点，偏向圆心外侧
+  const mx = (e.a.x + e.b.x) / 2, my = (e.a.y + e.b.y) / 2, dx = e.b.x - e.a.x, dy = e.b.y - e.a.y;
+  return [mx - dy * .18, my + dx * .18];
+}
+function pt(e, t) { const [qx, qy] = ctrl(e), u = 1 - t; return [u * u * e.a.x + 2 * u * t * qx + t * t * e.b.x, u * u * e.a.y + 2 * u * t * qy + t * t * e.b.y]; }
+function related(n) { // 悬停节点关联的节点集合
+  if (!n) return null; const s = new Set([n.id, 'me']);
+  edges.forEach(e => { if (e.a === n) s.add(e.b.id); if (e.b === n) s.add(e.a.id); });
+  if (n.type === 'me') nodes.forEach(m => s.add(m.id));
+  return s;
+}
+function draw(now) {
+  const time = (now - t0) / 1000, rel = related(hover);
+  ctx.clearRect(0, 0, W, H);
+  // 雪山背景，随鼠标轻微视差
+  const px = mouse.x > -1e3 ? (mouse.x / W - .5) : 0;
+  bgLayers.forEach((L, i) => ctx.drawImage(L, -20 - px * (i + 1) * 6, 0, W + 40, H));
+  ctx.fillStyle = 'rgba(7,9,12,.28)'; ctx.fillRect(0, 0, W, H);   // 压暗一层，保证地图文字清晰
+  // 飘雪
+  flakes.forEach(f => { if (!reduce) { f.y += f.v; f.x += Math.sin(time * .8 + f.p) * .25; if (f.y > H) { f.y = -4; f.x = Math.random() * W; } }
+    ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2); ctx.fillStyle = `rgba(235,245,255,${f.a})`; ctx.fill(); });
+  edges.forEach(e => {
+    const on = !rel || (rel.has(e.a.id) && rel.has(e.b.id)); const [qx, qy] = ctrl(e);
+    ctx.beginPath(); ctx.moveTo(e.a.x, e.a.y); ctx.quadraticCurveTo(qx, qy, e.b.x, e.b.y);
+    ctx.strokeStyle = e.color; ctx.globalAlpha = on ? (rel ? .55 : .22) : .05; ctx.lineWidth = on && rel ? 2 : 1.2; ctx.stroke(); ctx.globalAlpha = 1;
+  });
+  parts.forEach(p => {
+    const e = edges[p.e], on = !rel || (rel.has(e.a.id) && rel.has(e.b.id));
+    if (!reduce) { p.t += p.v * (on && rel ? 1.8 : 1); if (p.t > 1) p.t -= 1; }
+    const [x, y] = pt(e, p.t); ctx.beginPath(); ctx.arc(x, y, on && rel ? 2.2 : 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = e.color; ctx.globalAlpha = on ? .9 : .12; ctx.fill(); ctx.globalAlpha = 1;
+  });
+  nodes.forEach(n => {
+    const on = !rel || rel.has(n.id), pulse = n.type === 'me' ? Math.sin(time * 2) * 3 : 0;
+    ctx.globalAlpha = on ? 1 : .25;
+    if (n.type === 'me') { const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, 60 + pulse * 2); g.addColorStop(0, 'rgba(94,200,229,.35)'); g.addColorStop(1, 'rgba(94,200,229,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(n.x, n.y, 60 + pulse * 2, 0, Math.PI * 2); ctx.fill(); }
+    ctx.beginPath(); ctx.arc(n.x, n.y, n.r + (hover === n ? 3 : 0) + (n.type === 'me' ? pulse * .3 : 0), 0, Math.PI * 2);
+    if (n.type === 'work') { ctx.fillStyle = '#07090C'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = n.href ? C.amber : C.ink3; ctx.stroke(); }
+    else { ctx.fillStyle = n.color; ctx.shadowColor = n.color; ctx.shadowBlur = 14; ctx.fill(); ctx.shadowBlur = 0; }
+    ctx.font = `${n.type === 'me' ? 700 : n.type === 'work' ? 600 : 500} ${n.type === 'me' ? 14 : n.type === 'work' ? 12.5 : 11}px ${n.type === 'skill' ? '"JetBrains Mono",monospace' : '"Source Sans 3",sans-serif'}`;
+    ctx.fillStyle = n.type === 'skill' ? n.color : C.ink; ctx.textBaseline = 'middle';
+    const cx = W < 860 ? W / 2 : W * .68, right = n.x >= cx - 2;
+    if (n.type === 'me') { ctx.textAlign = 'center'; ctx.fillText(n.label, n.x, n.y + 30); }
+    else { ctx.textAlign = right ? 'left' : 'right'; ctx.fillText(n.label, n.x + (right ? n.r + 8 : -n.r - 8), n.y); }
+    ctx.globalAlpha = 1;
+  });
+  if (!reduce) requestAnimationFrame(draw);
+}
+function pick(x, y) { let best = null, bd = 1e9; nodes.forEach(n => { const d = Math.hypot(n.x - x, n.y - y); if (d < n.r + 14 && d < bd) { best = n; bd = d; } }); return best; }
+canvas.addEventListener('pointermove', ev => {
+  const r = canvas.getBoundingClientRect(); mouse = { x: ev.clientX - r.left, y: ev.clientY - r.top };
+  const n = pick(mouse.x, mouse.y); hover = n; canvas.style.cursor = n && n.href ? 'pointer' : 'default';
+  if (n && n.type !== 'me') { tip.innerHTML = `<b>${n.label}</b>${n.d}`; tip.hidden = false;
+    const hr = canvas.parentElement.getBoundingClientRect(); let lx = ev.clientX - hr.left + 14; if (lx + 290 > hr.width) lx = ev.clientX - hr.left - 294;
+    tip.style.left = lx + 'px'; tip.style.top = (ev.clientY - hr.top + 14) + 'px'; } else tip.hidden = true;
+  if (reduce) draw(performance.now());
+});
+canvas.addEventListener('pointerleave', () => { hover = null; mouse = { x: -1e4, y: -1e4 }; tip.hidden = true; if (reduce) draw(performance.now()); });
+canvas.addEventListener('click', ev => { const r = canvas.getBoundingClientRect(); const n = pick(ev.clientX - r.left, ev.clientY - r.top); if (n && n.href) location.href = n.href; });
+new ResizeObserver(() => { layout(); if (reduce) draw(performance.now()); }).observe(canvas);
+layout(); requestAnimationFrame(draw);
+</script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BIG G · Brand</title>
+<link rel="icon" href="biggmark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: lockup hero → the idea → palette → type → mark in use. Dark by design, like the site */
+:root{
+  color-scheme:dark;
+  --bg:#07090C; --panel:#0F1418; --ink:#EEF2F4; --ink-2:#A8B3BB; --ink-3:#66727C; --line:#1E262C;
+  --cyan:#5EC8E5; --green:#46D19A; --amber:#FFB347;
+  --display:"Bricolage Grotesque",system-ui,sans-serif; --body:"Source Sans 3",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 var(--body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:36px max(18px,env(safe-area-inset-left)) 80px max(18px,env(safe-area-inset-right))}
+nav{font:500 13px var(--mono);display:flex;justify-content:space-between;color:var(--ink-3)} nav a{color:var(--ink-3);text-decoration:none} nav a:hover{color:var(--ink)}
+.lockup{display:flex;align-items:center;gap:28px;margin:72px 0 20px;flex-wrap:wrap}
+.lockup img{width:clamp(110px,18vw,170px);height:auto}
+.word{font:800 clamp(64px,12vw,140px)/.85 var(--display);letter-spacing:-.04em}
+.word span{background:linear-gradient(90deg,var(--cyan),var(--green) 55%,var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+.tag{font:500 13px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+h2{font:500 12px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);margin:64px 0 16px;display:flex;align-items:center;gap:12px}
+h2::after{content:"";flex:1;height:1px;background:var(--line)}
+.idea{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:760px){.idea{grid-template-columns:1fr}}
+.idea div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.idea b{display:block;font:800 22px var(--display);margin-bottom:4px}
+.idea p{margin:0;color:var(--ink-2);font-size:15.5px}
+.swatches{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+@media (max-width:700px){.swatches{grid-template-columns:repeat(2,1fr)}}
+.sw{border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.sw i{display:block;height:84px}
+.sw div{padding:10px 12px;background:var(--panel)}
+.sw b{display:block;font:600 15px var(--body)} .sw span{font:12px var(--mono);color:var(--ink-3)}
+.type{display:grid;gap:12px}
+.type div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap}
+.type small{font:12px var(--mono);color:var(--ink-3)}
+.uses{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+.uses img{border-radius:50%;width:150px;height:150px;border:1px solid var(--line)}
+.uses p{color:var(--ink-2);margin:0}
+.uses a{color:var(--cyan)}
+footer{margin-top:64px;font:12px var(--mono);color:var(--ink-3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav><a href="../">← Gloria Liu</a><span>Personal brand</span></nav>
+
+  <div class="lockup">
+    <img src="biggmark.svg" alt="BIG G mark: a G whose crossbar rises into a snow-capped peak with a glowing node at the summit">
+    <div class="word">BIG <span>G</span></div>
+  </div>
+  <p class="tag">Gloria Liu · data · AI · music · mountains</p>
+
+  <h2>The idea</h2>
+  <div class="idea">
+    <div><b>G</b><p>For Gloria. One unbroken stroke, because the work runs end to end: from the business question to the tool people use.</p></div>
+    <div><b>The peak</b><p>The crossbar of the G rises into a snow-capped mountain: seeing the world, and climbing toward the hard question instead of around it.</p></div>
+    <div><b>The node</b><p>A glowing node at the summit, the same node-and-flow language as my data tools. Data in, a clear call out.</p></div>
+  </div>
+
+  <h2>Palette</h2>
+  <div class="swatches">
+    <div class="sw"><i style="background:#5EC8E5"></i><div><b>Glacier</b><span>#5EC8E5</span></div></div>
+    <div class="sw"><i style="background:#46D19A"></i><div><b>Aurora</b><span>#46D19A</span></div></div>
+    <div class="sw"><i style="background:#FFB347"></i><div><b>Summit</b><span>#FFB347</span></div></div>
+    <div class="sw"><i style="background:#07090C;border-bottom:1px solid #1E262C"></i><div><b>Night</b><span>#07090C</span></div></div>
+    <div class="sw"><i style="background:#EEF2F4"></i><div><b>Snow</b><span>#EEF2F4</span></div></div>
+  </div>
+
+  <h2>Type</h2>
+  <div class="type">
+    <div><span style="font:800 40px/1 var(--display);letter-spacing:-.02em">Bricolage Grotesque</span><small>display · headlines and the wordmark</small></div>
+    <div><span style="font:400 22px var(--body)">Source Sans 3 for reading</span><small>body · everything people read</small></div>
+    <div><span style="font:400 18px var(--mono);color:var(--cyan)">JetBrains Mono 0.84 · $90.0M</span><small>data · numbers, labels and code</small></div>
+  </div>
+
+  <h2>In use</h2>
+  <div class="uses">
+    <img src="avatar.png" alt="BIG G avatar: the mark over a night sky and snowy mountains">
+    <p>Profile picture for LinkedIn and GitHub, the browser-tab icon on every page of this site, and the header of the home page. Everything here, from the mark to the mountains, was designed and coded with AI.<br><a href="../">See the site →</a></p>
+  </div>
+
+  <footer>BIG G · © 2026 Gloria (Ruogu) Liu</footer>
+</div>
+</body>
+</html>
