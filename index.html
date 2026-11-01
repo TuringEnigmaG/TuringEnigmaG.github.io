@@ -120,7 +120,7 @@ footer{margin-top:30px;font:12px var(--mono);color:var(--ink-3)}
 
 <div class="wrap">
   <h2>Looking for</h2>
-  <p style="color:var(--ink-2);max-width:70ch;margin:0">Data science roles at <b style="color:var(--ink)">AI companies in the Bay Area</b>, in pricing, revenue, growth or finance analytics. Most recently I worked forward-deployed with the pricing and strategy team at Mercedes-Benz Financial Services: I interviewed the people who set prices, rebuilt their pricing chain in code, and built tools so pricing, sales and finance work from the same numbers. Based in Redwood City. Canadian citizen, TN-eligible.</p>
+  <p style="color:var(--ink-2);max-width:70ch;margin:0">Data science roles at <b style="color:var(--ink)">AI companies in the Bay Area</b>, in pricing, revenue, growth or finance analytics. Most recently I worked forward-deployed with a pricing and strategy team in auto finance: I interviewed the people who set prices, rebuilt their pricing chain in code, and built tools so pricing, sales and finance work from the same numbers. Based in Redwood City. Canadian citizen, TN-eligible.</p>
 
   <h2 id="work">AI work</h2>
   <div class="cards">
@@ -144,9 +144,9 @@ footer{margin-top:30px;font:12px var(--mono);color:var(--ink-3)}
 
   <h2>Data science toolkit</h2>
   <div class="kit">
-    <div><b>Causal inference & elasticity</b><p>Variant-level price elasticity over 44 months, separating a policy change from true price response.</p><span>pricing · econometrics</span></div>
-    <div><b>Optimization</b><p>Subsidy allocation under budget and profitability guardrails; the solver matched the expert plan in 23 of 27 cells.</p><span>constrained solvers</span></div>
-    <div><b>Forecasting</b><p>A loan-term mix model that cut out-of-sample error from 6.2% to 5.0%; ARIMA demand forecasts 12% more accurate.</p><span>time series</span></div>
+    <div><b>Causal inference & elasticity</b><p>Price elasticity at vehicle-variant level, separating the effect of a policy change from true price response.</p><span>pricing · econometrics</span></div>
+    <div><b>Optimization</b><p>Subsidy allocation under budget and profitability guardrails, framed as a parameterized objective with business-set weights.</p><span>constrained solvers</span></div>
+    <div><b>Forecasting</b><p>Loan-term mix and demand forecasting, judged on out-of-sample error; ARIMA demand forecasts 12% more accurate.</p><span>time series</span></div>
     <div><b>Machine learning & explainability</b><p>LightGBM models with per-model SHAP reports that guided the design of a sales audience-selection agent.</p><span>LightGBM · XGBoost · SHAP</span></div>
     <div><b>Survival analysis</b><p>100+ VIN-level Cox and Weibull models predicting vehicle reliability across 2.6B records.</p><span>time-to-event</span></div>
     <div><b>NLP</b><p>A BERT pipeline classifying 80,000+ recall entries a day, with sentence-embedding clustering and active learning.</p><span>BERT · SBERT</span></div>
@@ -201,9 +201,8 @@ const SKILLS = [
 const WORKS = [
   { id: 'tt', label: 'Token Trace', href: 'token-trace/', uses: ['pricing', 'opt', 'viz', 'code'], d: 'Interactive model of usage-based AI pricing. Click to open.' },
   { id: 'quant', label: 'Momentum, tested honestly', href: 'quant/', uses: ['causal', 'opt', 'ts', 'code'], d: 'Quant research and daily paper trading with cloud agents. Click to open.' },
-  { id: 'offer', label: 'Offer Trace (Mercedes-Benz)', uses: ['pricing', 'ts', 'viz', 'code'], d: 'What-if pricing tool built at work. Confidential; a synthetic-data demo is available on request.' },
-  { id: 'aud', label: 'Audience-selection agent', uses: ['agents', 'causal', 'ml'], d: 'Sales copilot agent guided by LightGBM + SHAP significance reports. Built at work; confidential.' },
-  { id: 'onto', label: 'Ontology lighthouse', uses: ['pricing', 'agents', 'viz'], d: 'Pricing objects modeled as a reusable semantic layer. Built at work.' },
+  { id: 'offer', label: 'Offer Trace', href: 'token-trace/', uses: ['pricing', 'ts', 'viz', 'code'], d: 'A what-if pricing tool I built for auto finance. Token Trace is its public cousin. Click to open.' },
+  { id: 'aud', label: 'Audience-selection agent', uses: ['agents', 'causal', 'ml'], d: 'Sales copilot agent whose design was guided by LightGBM + SHAP significance reports.' },
   { id: 'carfax', label: 'Vehicle reliability models (Carfax)', uses: ['surv', 'ml', 'ts'], d: '100+ VIN-level survival models over 2.6B vehicle records, served to the Vehicle History Report.' },
   { id: 'recall', label: 'Recall NLP pipeline (Carfax)', uses: ['nlp', 'ml'], d: 'BERT pipeline classifying 80,000+ recall entries a day into safety categories, with active learning.' },
   { id: 'mv', label: '汚れない手 · music video', href: '#music', uses: ['gen', 'code'], d: 'AI music video made end to end. Click to watch.' },
