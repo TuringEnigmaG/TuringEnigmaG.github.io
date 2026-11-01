@@ -76,10 +76,9 @@ video{width:100%;max-width:100%;border-radius:10px;display:block;background:#000
 .music h3{font:800 28px/1.1 var(--display);margin:4px 0 8px}
 .music h3 small{font:400 14px var(--body);color:var(--ink-3);margin-left:6px}
 .music p{color:var(--ink-2);font-size:15.5px;margin:0 0 12px}
-.life{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
-@media (max-width:1000px){.life{grid-template-columns:1fr 1fr}} @media (max-width:520px){.life{grid-template-columns:1fr}}
+.life{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
 .life div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
-.life i{display:block;width:26px;height:3px;border-radius:2px;margin-bottom:12px}
+.life i.bar{display:block;width:26px;height:3px;border-radius:2px;margin-bottom:12px}
 .life h3{font:600 19px/1.2 var(--display);margin:0 0 6px}
 .life p{font-size:14.5px;color:var(--ink-2);margin:0}
 .contact{margin-top:72px;background:linear-gradient(135deg,rgba(94,200,229,.12),rgba(255,179,71,.08));border:1px solid var(--line);border-radius:16px;padding:32px 26px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:18px}
@@ -182,11 +181,11 @@ footer{margin-top:30px;font:12px var(--mono);color:var(--ink-3)}
 
   <h2>Outside work</h2>
   <div class="life">
-    <div><i style="background:var(--amber)"></i><h3>Werewolf</h3><p>Reading people, weighing incomplete evidence and committing to a call before everyone agrees. Good practice for the day job.</p></div>
-    <div><i style="background:var(--green)"></i><h3>Writing on Chinese medicine</h3><p>I'm writing <i>解码中医</i> (Decoding TCM), a bilingual book that explains Traditional Chinese Medicine through modern medical evidence.</p></div>
-    <div><i style="background:var(--violet)"></i><h3>Music</h3><p>Composing, sound design and audio post-production, from AI soundtracks to full music videos. On repeat: Li Yundi and Seiji Ozawa.</p></div>
-    <div><i style="background:var(--ink-2)"></i><h3>Detective novels</h3><p>Following the clues, ruling out suspects, distrusting the obvious answer. The same instinct I bring to a model that looks too good.</p></div>
-    <div><i style="background:var(--cyan)"></i><h3>Seeing the world</h3><p>Lived and worked in Canada, China and the US. New places keep my assumptions honest.</p></div>
+    <div><i class="bar" style="background:var(--amber)"></i><h3>Werewolf</h3><p>Reading people, weighing incomplete evidence and committing to a call before everyone agrees. Good practice for the day job.</p></div>
+    <div><i class="bar" style="background:var(--green)"></i><h3>Writing on Chinese medicine</h3><p>I'm writing <i>解码中医</i> (Decoding TCM), a bilingual book that explains Traditional Chinese Medicine through modern medical evidence.</p></div>
+    <div><i class="bar" style="background:var(--violet)"></i><h3>Music</h3><p>Composing, sound design and audio post-production, from AI soundtracks to full music videos. On repeat: Li Yundi and Seiji Ozawa.</p></div>
+    <div><i class="bar" style="background:var(--ink-2)"></i><h3>Detective novels</h3><p>Following the clues, ruling out suspects, distrusting the obvious answer. The same instinct I bring to a model that looks too good.</p></div>
+    <div><i class="bar" style="background:var(--cyan)"></i><h3>Seeing the world</h3><p>Lived and worked in Canada, China and the US. New places keep my assumptions honest.</p></div>
   </div>
 
   <div class="contact">
@@ -233,7 +232,7 @@ function layout() {
   W = r.width; H = r.height; canvas.width = W * dpr; canvas.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   paintMountains(dpr);
   flakes = Array.from({ length: Math.round(W / 14) }, () => ({ x: Math.random() * W, y: Math.random() * H, r: .6 + Math.random() * 1.6, v: .25 + Math.random() * .7, a: .25 + Math.random() * .55, p: Math.random() * 6 }));
-  const narrow = W < 860, cx = narrow ? W / 2 : W * .68, cy = H / 2, R = Math.min(narrow ? W * .46 : W * .31, H * .46);
+  const narrow = W < 860, cx = narrow ? W / 2 : W * .71, cy = H / 2, R = Math.min(narrow ? W * .46 : W * .27, H * .46);
   nodes = [{ id: 'me', type: 'me', label: 'Gloria', x: cx, y: cy, r: 16, color: C.ink }];
   SKILLS.forEach((s, i) => { const a = -Math.PI / 2 + i / SKILLS.length * Math.PI * 2; nodes.push({ ...s, type: 'skill', x: cx + Math.cos(a) * R * .55, y: cy + Math.sin(a) * R * .5, r: 6 }); });
   WORKS.forEach((w, i) => { const a = -Math.PI / 2 + (i + .5) / WORKS.length * Math.PI * 2; nodes.push({ ...w, type: 'work', color: w.href ? C.ink : C.ink3, x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R * .92, r: w.href ? 9 : 7 }); });
@@ -318,8 +317,11 @@ function draw(now) {
     else { ctx.fillStyle = n.color; ctx.shadowColor = n.color; ctx.shadowBlur = 14; ctx.fill(); ctx.shadowBlur = 0; }
     ctx.font = `${n.type === 'me' ? 700 : n.type === 'work' ? 600 : 500} ${n.type === 'me' ? 14 : n.type === 'work' ? 12.5 : 11}px ${n.type === 'skill' ? '"JetBrains Mono",monospace' : '"Source Sans 3",sans-serif'}`;
     ctx.fillStyle = n.type === 'skill' ? n.color : C.ink; ctx.textBaseline = 'middle';
-    const cx = W < 860 ? W / 2 : W * .68, right = n.x >= cx - 2;
+    const cx = W < 860 ? W / 2 : W * .71, right = n.x >= cx - 2;
+    // 左侧外圈作品的标签放到节点下方居中，避免伸进左边的文字区
+    const below = n.type === 'work' && W >= 860 && n.x < cx - W * .12;
     if (n.type === 'me') { ctx.textAlign = 'center'; ctx.fillText(n.label, n.x, n.y + 30); }
+    else if (below) { ctx.textAlign = 'center'; const up = n.y < H / 2 + 40; ctx.fillText(n.label, n.x, up ? n.y - n.r - 12 : n.y + n.r + 14); }
     else { ctx.textAlign = right ? 'left' : 'right'; ctx.fillText(n.label, n.x + (right ? n.r + 8 : -n.r - 8), n.y); }
     ctx.globalAlpha = 1;
   });
