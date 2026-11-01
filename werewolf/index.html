@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Werewolf Lab · Gloria Liu</title>
+<meta name="description" content="A/B testing werewolf strategies with thousands of simulated games: win rates, confidence intervals, p-values, sample sizes and the peeking trap.">
+<link rel="icon" href="../brand/biggmark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: night-village look, dark by design. Hero → experiment runner (live) → peeking trap → league table → watch one game → method */
+:root{
+  color-scheme:dark;
+  --bg:#080A10; --panel:#10141C; --panel-2:#171C26; --ink:#EDF0F5; --ink-2:#A7B0BE; --ink-3:#6B7484; --line:#212836;
+  --good:#5EC8E5; --wolf:#E5484D; --moon:#F3E9C6; --amber:#FFB347; --green:#46D19A;
+  --display:"Bricolage Grotesque",system-ui,sans-serif; --body:"Source Sans 3",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 80% -10%,rgba(243,233,198,.12),transparent 45%),var(--bg);color:var(--ink);font:17px/1.6 var(--body);-webkit-font-smoothing:antialiased;min-height:100vh}
+.wrap{max-width:1120px;margin:0 auto;padding:32px max(18px,env(safe-area-inset-left)) 80px max(18px,env(safe-area-inset-right))}
+a{color:var(--good)}
+nav{font:500 13px var(--mono);display:flex;justify-content:space-between;color:var(--ink-3)} nav a{color:var(--ink-3);text-decoration:none} nav a:hover{color:var(--ink)}
+.kicker{font:500 12px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--moon);margin:44px 0 12px}
+h1{font:800 clamp(48px,8vw,96px)/.9 var(--display);letter-spacing:-.03em;margin:0 0 18px}
+h1 span{color:var(--wolf)}
+.lede{font-size:20px;color:var(--ink-2);max-width:62ch;margin:0}
+h2{font:600 26px/1.2 var(--display);margin:56px 0 8px}
+p{max-width:70ch;color:var(--ink-2)}
+p b{color:var(--ink)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.runner{display:grid;grid-template-columns:330px minmax(0,1fr);gap:16px;margin-top:18px}
+@media (max-width:900px){.runner{grid-template-columns:1fr}}
+label.f{display:block;font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:14px 0 6px}
+select,input[type=number]{width:100%;font:14px var(--body);background:var(--panel-2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+input[type=range]{width:100%;accent-color:var(--amber)}
+.arm{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center;margin-top:8px}
+.arm b{font:700 13px var(--mono);border-radius:6px;padding:2px 8px;color:#081018}
+.btn{font:600 15px var(--display);border-radius:999px;padding:11px 20px;border:1px solid var(--line);background:var(--panel-2);color:var(--ink);cursor:pointer;margin-top:16px;width:100%}
+.btn.primary{background:var(--amber);border-color:var(--amber);color:#1A1306}
+.btn:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--moon);outline-offset:2px}
+.bars{display:grid;gap:14px}
+.bar label{display:flex;justify-content:space-between;font:13px var(--mono);color:var(--ink-2)}
+.track{position:relative;height:34px;background:var(--panel-2);border-radius:8px;overflow:hidden;margin-top:4px}
+.fill{position:absolute;inset:0 auto 0 0;border-radius:8px}
+.ci{position:absolute;top:6px;bottom:6px;border-left:2px solid var(--ink);border-right:2px solid var(--ink);background:rgba(255,255,255,.12)}
+.half{position:absolute;top:0;bottom:0;left:50%;border-left:1px dashed var(--ink-3)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+@media (max-width:600px){.stats{grid-template-columns:1fr 1fr}}
+.stat{background:var(--panel-2);border-radius:10px;padding:10px 12px}
+.stat span{display:block;font:11px var(--mono);color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em}
+.stat b{font:800 24px var(--display);font-variant-numeric:tabular-nums}
+.verdict{margin-top:14px;padding:12px 14px;border-radius:10px;border:1px solid var(--line);font-size:16px}
+.verdict.sig{border-color:var(--green);background:rgba(70,209,154,.08)} .verdict.ns{border-color:var(--ink-3)}
+.chart svg{display:block;width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font:12px var(--mono);color:var(--ink-3);margin:6px 0}
+.legend i{display:inline-block;width:16px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+table{border-collapse:collapse;width:100%;font-size:15px;min-width:560px}
+.tw{overflow-x:auto}
+th{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);text-align:right;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:right;font:14px var(--mono);font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left} td:first-child{font-family:var(--body);font-size:15px}
+.pos{color:var(--good)} .neg{color:var(--wolf)} .muted{color:var(--ink-3)}
+.minibar{display:inline-block;height:8px;border-radius:4px;vertical-align:middle;margin-left:8px}
+.log{font:14px/1.7 var(--mono);background:#06080C;border:1px solid var(--line);border-radius:12px;padding:16px 18px;max-height:380px;overflow:auto;color:var(--ink-2)}
+.log .night{color:var(--moon);margin-top:8px} .log .day{color:var(--amber);margin-top:8px}
+.log .w{color:var(--wolf)} .log .g{color:var(--good)}
+.method{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.method{grid-template-columns:1fr}}
+.method h3{font:600 18px var(--display);margin:0 0 6px}
+.method p,.method li{font-size:15.5px}
+.method ul{padding-left:18px;margin:0;color:var(--ink-2)}
+footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font:13px var(--mono);color:var(--ink-3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav><a href="../">← Gloria Liu</a><span>Experimentation · Monte Carlo · 2026</span></nav>
+
+  <p class="kicker">12-player werewolf · seer, witch, hunter, guard</p>
+  <h1>Werewolf <span>Lab</span></h1>
+  <p class="lede">Should the witch save on night one? Should the seer reveal right away? Every werewolf table argues about this. Here you A/B test it instead: pick a strategy, run thousands of simulated games live, and see whether the difference is real or just luck.</p>
+
+  <h2>Run an experiment</h2>
+  <p>Both arms play the same seeded games except for the one strategy you change, so any gap comes from that strategy (and chance).</p>
+  <div class="runner">
+    <div class="card">
+      <label class="f" for="exp">Question</label>
+      <select id="exp"></select>
+      <div class="arm"><b style="background:var(--good)">A</b><span id="armA"></span></div>
+      <div class="arm"><b style="background:var(--amber)">B</b><span id="armB"></span></div>
+      <label class="f" for="games">Games per arm: <span id="gamesV"></span></label>
+      <input type="range" id="games" min="200" max="6000" step="200" value="3000">
+      <label class="f" for="skill">How well good players read people: <span id="skillV"></span></label>
+      <input type="range" id="skill" min="1.2" max="2.6" step="0.1" value="1.9">
+      <button class="btn primary" id="run">Run live</button>
+      <button class="btn" id="peekBtn" title="Stop as soon as p < 0.05">Run, but stop at the first p &lt; 0.05</button>
+    </div>
+    <div class="card">
+      <div class="bars">
+        <div class="bar"><label><span>A · good-team win rate</span><span id="rateA">–</span></label><div class="track"><div class="half"></div><div class="fill" id="fillA" style="background:var(--good)"></div><div class="ci" id="ciA"></div></div></div>
+        <div class="bar"><label><span>B · good-team win rate</span><span id="rateB">–</span></label><div class="track"><div class="half"></div><div class="fill" id="fillB" style="background:var(--amber)"></div><div class="ci" id="ciB"></div></div></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><span>Games played</span><b id="sN">0</b></div>
+        <div class="stat"><span>B − A</span><b id="sDiff">–</b></div>
+        <div class="stat"><span>95% CI of B − A</span><b id="sCI" style="font-size:18px">–</b></div>
+        <div class="stat"><span>p-value</span><b id="sP">–</b></div>
+      </div>
+      <div class="verdict ns" id="verdict">Press Run to start. Bars show the win rate with a 95% confidence interval.</div>
+      <div class="chart"><div class="legend"><span><i style="background:var(--amber)"></i>B − A as games accumulate</span><span><i style="background:rgba(255,179,71,.3);height:8px"></i>95% CI</span><span><i style="background:var(--ink-3)"></i>no difference</span></div><svg id="trail" viewBox="0 0 700 200" role="img" aria-label="Running difference between arms with its confidence band"></svg></div>
+    </div>
+  </div>
+
+  <h2>The peeking trap</h2>
+  <p>Stopping the moment p dips under 0.05 feels efficient, and it's one of the most common ways A/B tests go wrong. To see it, pick <b>"A/A test: identical strategies"</b> above and press <b>"Run, but stop at the first p &lt; 0.05"</b>. There is no real difference, yet if you watch closely enough, chance will hand you a "significant" result far more than 5% of the time.</p>
+  <div class="card"><div class="legend"><span><i style="background:var(--wolf)"></i>p-value over time</span><span><i style="background:var(--green)"></i>p = 0.05</span></div><div class="chart"><svg id="pTrail" viewBox="0 0 700 170" role="img" aria-label="p-value over the course of the experiment"></svg></div>
+    <p id="peekMsg" style="margin:8px 0 0">Run an experiment to see its p-value path.</p>
+    <button class="btn" id="aaBtn" style="width:auto">Simulate 200 peeked A/A tests</button> <span id="aaMsg" class="muted" style="font:14px var(--mono)"></span>
+  </div>
+
+  <h2>League table: every strategy against the baseline</h2>
+  <p>Each row changes one thing from the default table (the seer reveals on day one, the witch saves on night one and poisons when confident, the guard sits out night one, wolves don't fake-claim) and plays 6,000 games with the same random seed.</p>
+  <div class="card tw"><table><thead><tr><th>Strategy</th><th>Good-team win</th><th>vs baseline</th><th>95% CI</th><th>Significant?</th></tr></thead><tbody id="league"><tr><td colspan="5" class="muted">Computing…</td></tr></tbody></table></div>
+
+  <h2>Watch one game</h2>
+  <p>One seeded game, narrated night by night. Roles are shown here for you; the players at the table never see them.</p>
+  <div class="card"><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn primary" id="replay" style="width:auto;margin:0">Play a game</button><button class="btn" id="replayFake" style="width:auto;margin:0">Play one where a wolf fake-claims seer</button></div><div class="log" id="log" style="margin-top:14px">Press "Play a game".</div></div>
+
+  <h2>How it works</h2>
+  <div class="method">
+    <div class="card"><h3>The game</h3><ul><li>12 players: 4 wolves, 4 villagers, seer, witch, hunter, guard. Wolves win by eliminating all villagers or all gods.</li><li>Every night: the guard protects someone (not the same player twice), wolves kill, the witch may save or poison, the seer checks one player. Guarded and saved on the same night still dies.</li><li>Every day: the seer may reveal checks, a wolf may counter-claim, then everyone votes.</li></ul></div>
+    <div class="card"><h3>The people</h3><ul><li>Each good player has a noisy private read of everyone; wolves "feel" wolfier by a set amount (the read-skill slider).</li><li>A believed seer's checks shift those reads strongly. When two seers claim, each good player picks one to trust.</li><li>Wolves know each other and vote as a block, targeting the revealed seer first.</li></ul></div>
+    <div class="card"><h3>The statistics</h3><ul><li>Win rates with Wald 95% intervals.</li><li>Two-proportion z-test for B − A, with the same seed per arm so both see similar deals.</li><li>Sample size for 80% power at α = 0.05, from the observed rates.</li></ul></div>
+    <div class="card"><h3>Honest limits</h3><ul><li>It's a toy: real players bluff, read tone and adapt. The point is the experimental method, not a solved game.</li><li>Effects depend on the assumptions. The fair-game baseline (≈48% good) was tuned to the read-skill setting.</li></ul></div>
+  </div>
+  <footer>Gloria (Ruogu) Liu · built with Claude Code · <a href="sim.js">simulator source</a> · <a href="../">more work →</a></footer>
+</div>
+
+<script src="sim.js"></script>
+<script>
+// 实验运行器：两组按帧分批模拟，实时更新胜率、置信区间、p 值与偷看陷阱
+const $ = id => document.getElementById(id);
+const EXPS = [
+  { q: 'Should the seer reveal on day one, or wait until finding a wolf?', a: ['Seer reveals on day one', {}], b: ['Seer waits until a wolf is found', { seerReveal: 'onWolf' }] },
+  { q: 'Should the witch save on night one, or keep the antidote?', a: ['Witch saves on night one', {}], b: ['Witch keeps the antidote', { witchNight1: 'keep' }] },
+  { q: 'What if a wolf fake-claims seer (悍跳)?', a: ['Wolves stay quiet', {}], b: ['A wolf counter-claims seer', { wolfFake: 'fake' }] },
+  { q: 'Should the guard protect the revealed seer?', a: ['Guard sits out night one, then random', {}], b: ['Guard protects the revealed seer', { guardStyle: 'seer' }] },
+  { q: 'Does the guard guarding itself help?', a: ['Guard sits out night one, then random', {}], b: ['Guard protects itself', { guardStyle: 'self' }] },
+  { q: 'A/A test: identical strategies (no real difference)', a: ['Default strategy', {}], b: ['Default strategy (same)', {}] },
+];
+EXPS.forEach((e, i) => $('exp').insertAdjacentHTML('beforeend', `<option value="${i}">${e.q}</option>`));
+function showArms() { const e = EXPS[+$('exp').value]; $('armA').textContent = e.a[0]; $('armB').textContent = e.b[0]; }
+$('exp').addEventListener('change', showArms); showArms();
+const sync = () => { $('gamesV').textContent = (+$('games').value).toLocaleString(); $('skillV').textContent = (+$('skill').value).toFixed(1); };
+$('games').addEventListener('input', sync); $('skill').addEventListener('input', sync); sync();
+
+// 统计工具
+function erf(x) { const s = Math.sign(x); x = Math.abs(x); const t = 1 / (1 + .3275911 * x); const y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - .284496736) * t + .254829592) * t * Math.exp(-x * x); return s * y; }
+const pNorm = z => .5 * (1 + erf(z / Math.SQRT2));
+function test(a, b) {
+  const pa = a.good / a.n, pb = b.good / b.n, pool = (a.good + b.good) / (a.n + b.n);
+  const se0 = Math.sqrt(pool * (1 - pool) * (1 / a.n + 1 / b.n)), se = Math.sqrt(pa * (1 - pa) / a.n + pb * (1 - pb) / b.n);
+  const z = se0 > 0 ? (pb - pa) / se0 : 0;
+  return { pa, pb, d: pb - pa, lo: pb - pa - 1.96 * se, hi: pb - pa + 1.96 * se, p: 2 * (1 - pNorm(Math.abs(z))) };
+}
+function nNeeded(p1, p2) { const d = Math.abs(p2 - p1); if (d < 1e-4) return Infinity; const pb = (p1 + p2) / 2; return Math.ceil(Math.pow(1.96 * Math.sqrt(2 * pb * (1 - pb)) + .8416 * Math.sqrt(p1 * (1 - p1) + p2 * (1 - p2)), 2) / (d * d)); }
+const pc = v => (v * 100).toFixed(1) + '%', pp = v => (v >= 0 ? '+' : '−') + Math.abs(v * 100).toFixed(1) + 'pp';
+
+let running = null;
+function runExp(stopAtSig) {
+  if (running) { cancelAnimationFrame(running.raf); running = null; }
+  const e = EXPS[+$('exp').value], N = +$('games').value, skill = +$('skill').value;
+  const seed = (Math.random() * 1e9) | 0;
+  // 两组用同一个种子：发牌与随机性尽量相同，只有策略不同
+  const rA = WW.mulberry32(seed), rB = WW.mulberry32(seed);
+  const cA = Object.assign({ skill }, e.a[1]), cB = Object.assign({ skill }, e.b[1]);
+  const A = { n: 0, good: 0 }, B = { n: 0, good: 0 }, trail = [];
+  running = {};
+  $('verdict').className = 'verdict ns'; $('verdict').textContent = 'Running…';
+  const step = () => {
+    const batch = Math.min(60, N - A.n);
+    for (let k = 0; k < batch; k++) { if (WW.play(cA, rA).winner === 'good') A.good++; A.n++; if (WW.play(cB, rB).winner === 'good') B.good++; B.n++; }
+    const t = test(A, B); trail.push({ n: A.n, ...t }); draw(A, B, t, trail, e, false);
+    if (stopAtSig && A.n >= 100 && t.p < .05) { draw(A, B, t, trail, e, true); running = null; return; }
+    if (A.n < N) running.raf = requestAnimationFrame(step); else { draw(A, B, t, trail, e, true); running = null; }
+  };
+  running.raf = requestAnimationFrame(step);
+}
+function draw(A, B, t, trail, e, done) {
+  const setBar = (fill, ci, p, n) => { const se = Math.sqrt(p * (1 - p) / n); fill.style.width = (p * 100) + '%'; ci.style.left = Math.max(0, (p - 1.96 * se) * 100) + '%'; ci.style.width = (3.92 * se * 100) + '%'; };
+  setBar($('fillA'), $('ciA'), t.pa, A.n); setBar($('fillB'), $('ciB'), t.pb, B.n);
+  $('rateA').textContent = pc(t.pa); $('rateB').textContent = pc(t.pb);
+  $('sN').textContent = (A.n * 2).toLocaleString(); $('sDiff').textContent = pp(t.d);
+  $('sCI').textContent = `${pp(t.lo)} … ${pp(t.hi)}`; $('sP').textContent = t.p < .001 ? '<0.001' : t.p.toFixed(3);
+  if (done) {
+    const sig = t.p < .05, need = nNeeded(t.pa, t.pb);
+    $('verdict').className = 'verdict ' + (sig ? 'sig' : 'ns');
+    $('verdict').innerHTML = sig
+      ? `<b>Significant.</b> B ${t.d > 0 ? 'helps' : 'hurts'} the good team by ${pp(Math.abs(t.d)).slice(1)} (95% CI ${pp(t.lo)} to ${pp(t.hi)}).` + (A.n < +$('games').value ? ` <b>But you stopped early</b> at ${A.n.toLocaleString()} games per arm, the moment p crossed 0.05. Run the full test before believing it.` : '')
+      : `<b>Not significant.</b> The interval includes zero, so ${A.n.toLocaleString()} games per arm can't tell this difference from luck.` + (isFinite(need) ? ` To detect a ${pp(Math.abs(t.d)).slice(1)} gap with 80% power you'd need about <b>${need.toLocaleString()}</b> games per arm.` : '');
+  }
+  // 差值轨迹
+  const W = 700, H = 200, L = 64, R = 10, T = 10, Bt = 22, maxN = +$('games').value;
+  const lo = Math.min(-.12, ...trail.map(p => p.lo)), hi = Math.max(.12, ...trail.map(p => p.hi));
+  const x = n => L + n / maxN * (W - L - R), y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - Bt);
+  const band = trail.map((p, i) => `${i ? 'L' : 'M'}${x(p.n)} ${y(p.hi)}`).join('') + trail.slice().reverse().map(p => `L${x(p.n)} ${y(p.lo)}`).join('') + 'Z';
+  $('trail').innerHTML = `<line x1="${L}" x2="${W - R}" y1="${y(0)}" y2="${y(0)}" stroke="var(--ink-3)" stroke-dasharray="3 3"/>
+    <text x="${L - 6}" y="${y(hi) + 10}" text-anchor="end" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--ink-3)">${pp(hi)}</text>
+    <text x="${L - 6}" y="${y(lo)}" text-anchor="end" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--ink-3)">${pp(lo)}</text>
+    <text x="${W - R}" y="${H - 6}" text-anchor="end" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--ink-3)">${maxN.toLocaleString()} games / arm</text>
+    <path d="${band}" fill="rgba(255,179,71,.22)"/>
+    <path d="${trail.map((p, i) => `${i ? 'L' : 'M'}${x(p.n)} ${y(p.d)}`).join('')}" fill="none" stroke="var(--amber)" stroke-width="2"/>`;
+  // p 值轨迹
+  const H2 = 170, yp = v => T + (1 - Math.min(1, v)) * (H2 - T - Bt);
+  const first = trail.findIndex(p => p.n >= 100 && p.p < .05);
+  $('pTrail').innerHTML = `<line x1="${L}" x2="${W - R}" y1="${yp(.05)}" y2="${yp(.05)}" stroke="var(--green)" stroke-dasharray="4 3"/>
+    <text x="${L - 6}" y="${yp(.05) + 4}" text-anchor="end" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--green)">0.05</text>
+    <text x="${L - 6}" y="${yp(1) + 10}" text-anchor="end" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--ink-3)">1.0</text>
+    <path d="${trail.map((p, i) => `${i ? 'L' : 'M'}${x(p.n)} ${yp(p.p)}`).join('')}" fill="none" stroke="var(--wolf)" stroke-width="2"/>
+    ${first >= 0 ? `<circle cx="${x(trail[first].n)}" cy="${yp(trail[first].p)}" r="5" fill="var(--green)"/>` : ''}`;
+  if (done) $('peekMsg').textContent = first >= 0 ? `p first dipped below 0.05 after ${trail[first].n.toLocaleString()} games per arm (green dot)${trail[trail.length - 1].p >= .05 ? ', then drifted back above it. A team that stopped there would have shipped a false win.' : '.'}` : 'p never dipped below 0.05 in this run.';
+}
+$('run').addEventListener('click', () => runExp(false));
+$('peekBtn').addEventListener('click', () => runExp(true));
+
+// 200 次被偷看的 A/A 测试：统计"假阳性"比例
+$('aaBtn').addEventListener('click', () => {
+  $('aaMsg').textContent = 'Running…';
+  setTimeout(() => {
+    let fp = 0, fpFixed = 0; const reps = 200, N = 1000, skill = +$('skill').value;
+    for (let k = 0; k < reps; k++) {
+      const s = (Math.random() * 1e9) | 0, rA = WW.mulberry32(s), rB = WW.mulberry32(s + 1);
+      const A = { n: 0, good: 0 }, B = { n: 0, good: 0 }; let peeked = false;
+      while (A.n < N) { for (let j = 0; j < 50; j++) { if (WW.play({ skill }, rA).winner === 'good') A.good++; A.n++; if (WW.play({ skill }, rB).winner === 'good') B.good++; B.n++; } if (!peeked && test(A, B).p < .05) peeked = true; }
+      if (peeked) fp++; if (test(A, B).p < .05) fpFixed++;
+    }
+    $('aaMsg').textContent = `Peeking after every 50 games: ${(fp / reps * 100).toFixed(0)}% of these no-difference tests looked "significant" at some point. Checking only once at the end: ${(fpFixed / reps * 100).toFixed(0)}% (≈5%, as designed).`;
+  }, 30);
+});
+
+// 联赛表：后台分批计算
+const LEAGUE = [
+  ['Baseline (default strategies)', {}],
+  ['Guard protects the revealed seer', { guardStyle: 'seer' }],
+  ['Seer waits until a wolf is found', { seerReveal: 'onWolf' }],
+  ['Witch keeps the antidote on night one', { witchNight1: 'keep' }],
+  ['Guard protects itself', { guardStyle: 'self' }],
+  ['A wolf fake-claims seer (悍跳)', { wolfFake: 'fake' }],
+  ['Witch never poisons', { witchPoison: false }],
+  ['Seer never reveals', { seerReveal: 'never' }],
+];
+function league() {
+  const rows = []; let i = 0;
+  const one = () => {
+    const [name, c] = LEAGUE[i], o = WW.run(c, 6000, 20261101); rows.push({ name, good: o.good, n: o.games });
+    const base = rows[0];
+    $('league').innerHTML = rows.map((r, k) => { const t = test({ n: base.n, good: base.good }, { n: r.n, good: r.good }), rate = r.good / r.n;
+      return `<tr><td>${r.name}</td><td>${pc(rate)}<span class="minibar" style="width:${rate * 80}px;background:${rate >= .5 ? 'var(--good)' : 'var(--wolf)'}"></span></td><td class="${k === 0 ? 'muted' : t.d > 0 ? 'pos' : 'neg'}">${k === 0 ? '–' : pp(t.d)}</td><td class="muted">${k === 0 ? '–' : `${pp(t.lo)} … ${pp(t.hi)}`}</td><td>${k === 0 ? '–' : t.p < .05 ? 'yes' : '<span class="muted">no</span>'}</td></tr>`; }).join('') + (i < LEAGUE.length - 1 ? '<tr><td colspan="5" class="muted">Computing…</td></tr>' : '');
+    if (++i < LEAGUE.length) setTimeout(one, 20);
+  };
+  setTimeout(one, 300);
+}
+league();
+
+// 讲述一局
+function replay(cfg) {
+  const log = [], r = WW.mulberry32((Math.random() * 1e9) | 0), o = WW.play(Object.assign({ skill: +$('skill').value }, cfg), r, log);
+  const fmt = s => s.replace(/\((wolf)\)/g, '<span class="w">($1)</span>').replace(/\((villager|seer|witch|hunter|guard)\)/g, '<span class="g">($1)</span>');
+  $('log').innerHTML = log.map(s => /^Night/.test(s) ? `<div class="night">☾ ${s}</div>` : /^Day/.test(s) ? `<div class="day">☀ ${s}</div>` : `<div>${fmt(s)}</div>`).join('') +
+    `<div class="${o.winner === 'good' ? 'g' : 'w'}" style="margin-top:10px;font-weight:600">${o.winner === 'good' ? 'The village wins' : 'The wolves win'} on day ${o.days}.</div>`;
+}
+$('replay').addEventListener('click', () => replay({}));
+$('replayFake').addEventListener('click', () => replay({ wolfFake: 'fake' }));
+</script>
+</body>
+</html>
